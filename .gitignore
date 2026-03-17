@@ -16,6 +16,8 @@ build/
 .env
 .env.local
 .env.production
+tokens.txt
+RAILWAY_ENV_VARS.md
 
 # IDE
 .vscode/
@@ -24,6 +26,9 @@ build/
 
 # Docker
 pgdata/
+
+# Test artifacts
+test.db
 
 # OS
 .DS_Store

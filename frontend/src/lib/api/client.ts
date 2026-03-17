@@ -104,6 +104,13 @@ export const api = {
 	requestPayout: (auth: string, data: any) =>
 		request<any>('/payouts/request', { method: 'POST', body: data, ...(auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }) }),
 
+	// Billing / Plan Upgrades
+	createUpgradePayment: (token: string, plan: string, chain: string = 'polygon', tokenName: string = 'USDC') =>
+		request<any>(`/billing/upgrade?plan=${plan}&chain=${chain}&token=${tokenName}`, { method: 'POST', token }),
+
+	getCurrentPlan: (token: string) =>
+		request<any>('/billing/current-plan', { token }),
+
 	// Admin
 	adminStats: (token: string) => request<any>('/admin/stats', { token }),
 

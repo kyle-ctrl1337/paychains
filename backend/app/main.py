@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import uuid
 from contextlib import asynccontextmanager
 
@@ -19,6 +20,7 @@ from app.models.payment import Payment
 from app.models.merchant import Merchant
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 
@@ -50,6 +52,15 @@ async def lifespan(app: FastAPI):
             if merchant and not merchant.is_admin:
                 merchant.is_admin = True
                 await session.commit()
+
+    # Log warning if admin has no xpub configured
+    async with async_session() as session:
+        result = await session.execute(
+            select(Merchant).where(Merchant.is_admin == True)  # noqa: E712
+        )
+        admin = result.scalar_one_or_none()
+        if admin and not admin.xpub_key:
+            logger.warning("Admin merchant has no xpub_key! Plan upgrades won't work until xpub is configured.")
 
     yield
 

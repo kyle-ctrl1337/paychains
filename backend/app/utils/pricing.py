@@ -1,6 +1,10 @@
+import logging
 import httpx
 from decimal import Decimal
-from functools import lru_cache
+
+from app.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 # CoinGecko token ID mapping
 TOKEN_IDS = {
@@ -39,10 +43,18 @@ async def get_token_price_usd(token: str) -> Decimal:
     if not coingecko_id:
         raise ValueError(f"Unsupported token: {token}")
 
+    settings = get_settings()
+    headers: dict[str, str] = {}
+    params: dict[str, str] = {"ids": coingecko_id, "vs_currencies": "usd"}
+
+    if settings.coingecko_api_key:
+        headers["x-cg-demo-api-key"] = settings.coingecko_api_key
+
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"https://api.coingecko.com/api/v3/simple/price",
-            params={"ids": coingecko_id, "vs_currencies": "usd"},
+            "https://api.coingecko.com/api/v3/simple/price",
+            params=params,
+            headers=headers,
             timeout=10.0,
         )
         response.raise_for_status()
@@ -50,6 +62,7 @@ async def get_token_price_usd(token: str) -> Decimal:
         price = Decimal(str(data[coingecko_id]["usd"]))
 
     _price_cache[token_upper] = (price, time.time())
+    logger.debug(f"Price for {token_upper}: ${price}")
     return price
 
 

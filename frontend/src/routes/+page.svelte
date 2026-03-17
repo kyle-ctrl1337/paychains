@@ -53,14 +53,14 @@
 	const metrics = [
 		{ value: '5+', label: 'Blockchains' },
 		{ value: '<1s', label: 'API Latency' },
-		{ value: '99.99%', label: 'Uptime SLA' },
+		{ value: '100%', label: 'Non-Custodial' },
 		{ value: '$0', label: 'Transaction Fee' }
 	];
 
 	const comparison = [
 		{ feature: 'Multi-chain EVM support', paychains: true, stripe: false, coinbase: true, bitpay: false },
 		{ feature: 'Recurring subscriptions', paychains: true, stripe: true, coinbase: false, bitpay: false },
-		{ feature: 'Auto-convert to stablecoins', paychains: true, stripe: false, coinbase: false, bitpay: true },
+		{ feature: 'Auto-convert to stablecoins', paychains: 'soon', stripe: false, coinbase: false, bitpay: true },
 		{ feature: 'HD wallet per payment', paychains: true, stripe: false, coinbase: false, bitpay: false },
 		{ feature: 'API-first (no dashboard required)', paychains: true, stripe: true, coinbase: false, bitpay: false },
 		{ feature: 'Hosted checkout + QR codes', paychains: true, stripe: true, coinbase: true, bitpay: true },
@@ -290,8 +290,10 @@ console.<span class="token-function">log</span>(payment.<span class="token-prope
 								<tr class="{i % 2 === 0 ? 'bg-white/[0.01]' : ''} border-b border-white/[0.04] last:border-0">
 									<td class="px-5 py-3 text-surface-300">{row.feature}</td>
 									<td class="px-5 py-3 text-center">
-										{#if row.paychains}
+										{#if row.paychains === true}
 											<svg class="w-5 h-5 text-emerald-400 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+										{:else if row.paychains === 'soon'}
+											<span class="text-[11px] text-amber-400 font-medium">Soon</span>
 										{:else}
 											<span class="text-surface-600">—</span>
 										{/if}
@@ -403,8 +405,8 @@ console.<span class="token-function">log</span>(payment.<span class="token-prope
 							Analytics dashboard
 						</li>
 					</ul>
-					<a href="/auth/register" class="block mt-8 text-center px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-[13px] font-semibold transition-all hover:shadow-lg hover:shadow-brand-500/20">
-						Start with Pro
+					<a href="/auth/register?plan=pro" class="block mt-8 text-center px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-[13px] font-semibold transition-all hover:shadow-lg hover:shadow-brand-500/20">
+						Pay with Crypto
 					</a>
 				</div>
 
@@ -431,7 +433,7 @@ console.<span class="token-function">log</span>(payment.<span class="token-prope
 							5,000 req/min API limit
 						</li>
 					</ul>
-					<a href="mailto:sales@paychains.dev" class="block mt-8 text-center px-4 py-2.5 rounded-xl border border-white/[0.08] text-[13px] font-medium hover:bg-white/[0.04] transition-colors">
+					<a href="mailto:hello@paychains.dev?subject=PayChains Enterprise" class="block mt-8 text-center px-4 py-2.5 rounded-xl border border-white/[0.08] text-[13px] font-medium hover:bg-white/[0.04] transition-colors">
 						Contact sales
 					</a>
 				</div>

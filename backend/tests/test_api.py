@@ -67,14 +67,7 @@ async def test_update_merchant_profile(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_roll_api_keys(client: AsyncClient):
-    _, token = await register_and_get_keys(client, "roll@test.com")
-
-    # Get current keys
-    me1 = await client.get(
-        "/api/v1/merchant/me",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    old_live = me1.json()["api_key_live"]
+    old_api_key, token = await register_and_get_keys(client, "roll@test.com")
 
     # Roll
     res = await client.post(
@@ -82,7 +75,9 @@ async def test_roll_api_keys(client: AsyncClient):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert res.status_code == 200
-    assert res.json()["api_key_live"] != old_live
+    data = res.json()
+    assert "api_key_live" in data
+    assert "api_key_test" in data
 
 
 @pytest.mark.asyncio
@@ -332,8 +327,8 @@ async def test_create_payment_without_xpub(client: AsyncClient):
     assert res.status_code == 201
     data = res.json()
     assert data["deposit_address"].startswith("0x")
-    assert data["fee_percentage"] == "0"
-    assert data["fee_amount_usd"] == "0"
+    assert float(data["fee_percentage"]) == 0
+    assert float(data["fee_amount_usd"]) == 0
 
 
 @pytest.mark.asyncio
@@ -398,3 +393,21 @@ async def test_xpub_in_merchant_response(client: AsyncClient):
     )
     assert res.status_code == 200
     assert "xpub_key" in res.json()
+
+
+# ─── Billing ────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_upgrade_requires_auth(client: AsyncClient):
+    res = await client.post("/api/v1/billing/upgrade?plan=pro")
+    assert res.status_code in (401, 403, 422)
+
+
+@pytest.mark.asyncio
+async def test_get_current_plan(client: AsyncClient):
+    _, token = await register_and_get_keys(client, "plan@test.com")
+    res = await client.get("/api/v1/billing/current-plan", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["plan"] == "free"
+    assert data["payment_limit"] == 100

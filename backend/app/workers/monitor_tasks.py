@@ -117,6 +117,17 @@ async def _async_poll_payments():
                         logger.info(f"Payment {payment.id}: completed ({confs} confs)")
                         _fire_webhook(session, payment, "payment.completed")
 
+                        # Handle plan upgrade payments
+                        if payment.metadata_ and isinstance(payment.metadata_, dict) and payment.metadata_.get("type") == "plan_upgrade":
+                            upgrading_merchant_id = payment.metadata_.get("upgrading_merchant_id")
+                            target_plan = payment.metadata_.get("target_plan")
+                            if upgrading_merchant_id and target_plan:
+                                from app.models.merchant import Merchant as MerchantModel
+                                upgrading_merchant = session.get(MerchantModel, upgrading_merchant_id)
+                                if upgrading_merchant:
+                                    upgrading_merchant.plan = target_plan
+                                    logger.info(f"Merchant {upgrading_merchant_id} upgraded to {target_plan} via payment {payment.id}")
+
             except Exception as e:
                 logger.error(f"Error polling payment {payment.id}: {e}")
 

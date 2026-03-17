@@ -2,7 +2,9 @@ import asyncio
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import event, JSON
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 
 from app.database import Base, get_db
 from app.main import app
@@ -16,6 +18,17 @@ def event_loop():
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
+
+
+# Patch PostgreSQL types → SQLite-compatible types
+@event.listens_for(Base.metadata, "before_create")
+def _patch_pg_types(target, connection, **kw):
+    for table in target.tables.values():
+        for column in table.columns:
+            if isinstance(column.type, JSONB):
+                column.type = JSON()
+            elif isinstance(column.type, ARRAY):
+                column.type = JSON()
 
 
 @pytest_asyncio.fixture(scope="function")

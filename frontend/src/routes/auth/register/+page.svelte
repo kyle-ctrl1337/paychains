@@ -37,7 +37,13 @@
 	}
 
 	function goToDashboard() {
-		goto('/dashboard');
+		const params = new URLSearchParams(window.location.search);
+		const plan = params.get('plan');
+		if (plan === 'pro' || plan === 'enterprise') {
+			goto(`/dashboard/settings?upgrade=${plan}`);
+		} else {
+			goto('/dashboard');
+		}
 	}
 </script>
 
@@ -83,7 +89,7 @@
 					</div>
 					<div>
 						<div class="text-[13px] font-medium">Accept payments</div>
-						<div class="text-[12px] text-surface-500">On 7 blockchains, from day one.</div>
+						<div class="text-[12px] text-surface-500">On 5 EVM chains, from day one.</div>
 					</div>
 				</div>
 			</div>

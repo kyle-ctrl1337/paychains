@@ -11,6 +11,7 @@
 	let xpubKey = $state('');
 	let saving = $state(false);
 	let savingXpub = $state(false);
+	let upgrading = $state(false);
 
 	let apiKeyLive = $state('');
 	let apiKeyTest = $state('');
@@ -22,7 +23,7 @@
 	// Address preview derived from xpub
 	let previewAddresses = $state<string[]>([]);
 
-	onMount(() => {
+	onMount(async () => {
 		auth.subscribe((state) => {
 			if (!state.token) return;
 			token = state.token;
@@ -33,6 +34,26 @@
 			apiKeyLive = state.apiKeyLive || '';
 			apiKeyTest = state.apiKeyTest || '';
 		});
+
+		// Handle URL params for post-upgrade/post-registration flows
+		const params = new URLSearchParams(window.location.search);
+		if (params.get('upgraded')) {
+			toast.success(`Successfully upgraded to ${params.get('upgraded')}!`);
+			window.history.replaceState({}, '', '/dashboard/settings');
+			// Refresh merchant data
+			if (token) {
+				try {
+					const me = await api.getMe(token);
+					setAuth(token, me);
+				} catch {}
+			}
+		}
+		if (params.get('upgrade')) {
+			const plan = params.get('upgrade');
+			window.history.replaceState({}, '', '/dashboard/settings');
+			if (plan === 'pro') upgradeToPro();
+			else if (plan === 'enterprise') upgradeToEnterprise();
+		}
 	});
 
 	function generatePreviewAddresses(xpub: string) {
@@ -105,6 +126,28 @@
 		}
 	}
 
+	async function upgradeToPro() {
+		upgrading = true;
+		try {
+			const result = await api.createUpgradePayment(token, 'pro');
+			window.location.href = `/checkout/upgrade/${result.payment_id}?plan=pro`;
+		} catch (e: any) {
+			toast.error(e.message || 'Failed to create upgrade payment');
+			upgrading = false;
+		}
+	}
+
+	async function upgradeToEnterprise() {
+		upgrading = true;
+		try {
+			const result = await api.createUpgradePayment(token, 'enterprise');
+			window.location.href = `/checkout/upgrade/${result.payment_id}?plan=enterprise`;
+		} catch (e: any) {
+			toast.error(e.message || 'Failed to create upgrade payment');
+			upgrading = false;
+		}
+	}
+
 	function copyToClipboard(text: string, type: string) {
 		navigator.clipboard.writeText(text);
 		copiedKey = type;
@@ -117,6 +160,34 @@
 	<div class="mb-8">
 		<h1 class="text-xl font-bold tracking-tight">Settings</h1>
 		<p class="text-[13px] text-surface-400 mt-1">Manage your wallet, API keys, and configuration</p>
+	</div>
+
+	<!-- Current Plan -->
+	<div class="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 mb-6">
+		<h2 class="text-[15px] font-semibold mb-4">Current Plan</h2>
+		<div class="flex items-center justify-between flex-wrap gap-4">
+			<div>
+				<span class="text-lg font-bold capitalize">{merchant?.plan || 'free'}</span>
+				<span class="text-[13px] text-surface-400 ml-2">
+					{merchant?.plan === 'free' ? '100 payments/mo' :
+					 merchant?.plan === 'pro' ? '2,000 payments/mo' : 'Unlimited'}
+				</span>
+			</div>
+			{#if !merchant?.plan || merchant?.plan === 'free'}
+				<button onclick={upgradeToPro} disabled={upgrading}
+					class="px-4 py-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-50 rounded-lg text-[13px] font-medium transition-all">
+					{upgrading ? 'Creating payment...' : 'Upgrade to Pro — $49/mo'}
+				</button>
+			{:else if merchant?.plan === 'pro'}
+				<button onclick={upgradeToEnterprise} disabled={upgrading}
+					class="px-4 py-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-50 rounded-lg text-[13px] font-medium transition-all">
+					{upgrading ? 'Creating payment...' : 'Upgrade to Enterprise — $199/mo'}
+				</button>
+			{:else}
+				<span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[12px] font-medium">Enterprise Active</span>
+			{/if}
+		</div>
+		<p class="text-[12px] text-surface-500 mt-3">Pay with crypto. Plans renew monthly.</p>
 	</div>
 
 	<!-- Wallet Configuration (xpub) -->

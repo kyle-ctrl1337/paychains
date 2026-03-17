@@ -8,6 +8,7 @@ from app.api.v1.checkout import router as checkout_router
 from app.api.v1.webhooks import router as webhooks_router
 from app.api.v1.payouts import router as payouts_router
 from app.api.v1.analytics import router as analytics_router
+from app.api.v1.admin import router as admin_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -20,3 +21,4 @@ api_router.include_router(checkout_router)
 api_router.include_router(webhooks_router)
 api_router.include_router(payouts_router)
 api_router.include_router(analytics_router)
+api_router.include_router(admin_router)

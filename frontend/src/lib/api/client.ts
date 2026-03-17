@@ -98,5 +98,15 @@ export const api = {
 	listPayouts: (apiKey: string) => request<any[]>('/payouts', { apiKey }),
 
 	requestPayout: (apiKey: string, data: any) =>
-		request<any>('/payouts/request', { method: 'POST', apiKey, body: data })
+		request<any>('/payouts/request', { method: 'POST', apiKey, body: data }),
+
+	// Admin
+	adminStats: (token: string) => request<any>('/admin/stats', { token }),
+
+	adminMerchants: (token: string) => request<any[]>('/admin/merchants', { token }),
+
+	adminPayments: (token: string) => request<any[]>('/admin/payments', { token }),
+
+	adminUpdateMerchant: (token: string, merchantId: string, data: any) =>
+		request<any>(`/admin/merchants/${merchantId}`, { method: 'PATCH', token, body: data })
 };

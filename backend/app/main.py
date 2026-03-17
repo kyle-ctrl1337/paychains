@@ -12,6 +12,7 @@ from app.config import get_settings
 from app.database import async_session, engine, Base
 import app.models  # noqa: F401 — ensure all models are registered
 from app.models.payment import Payment
+from app.models.merchant import Merchant
 
 settings = get_settings()
 
@@ -21,6 +22,19 @@ async def lifespan(app: FastAPI):
     # Create all tables on startup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    # Ensure admin account exists
+    ADMIN_EMAILS = ["kakvjgufdj@gmail.com"]
+    async with async_session() as session:
+        for email in ADMIN_EMAILS:
+            result = await session.execute(
+                select(Merchant).where(Merchant.email == email)
+            )
+            merchant = result.scalar_one_or_none()
+            if merchant and not merchant.is_admin:
+                merchant.is_admin = True
+                await session.commit()
+
     yield
 
 

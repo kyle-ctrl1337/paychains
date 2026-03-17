@@ -10,6 +10,7 @@ interface Merchant {
 	auto_convert_to: string;
 	settlement_address: Record<string, string>;
 	is_active: boolean;
+	is_admin: boolean;
 }
 
 interface AuthState {

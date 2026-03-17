@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://backend-api-production-5e9e.up.railway.app/api/:path*"
+      "destination": "https://api.paychains.dev/api/:path*"
     },
     {
       "source": "/ws/:path*",
-      "destination": "https://backend-api-production-5e9e.up.railway.app/ws/:path*"
+      "destination": "https://api.paychains.dev/ws/:path*"
     }
   ]
 }

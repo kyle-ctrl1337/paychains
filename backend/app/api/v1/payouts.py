@@ -38,13 +38,13 @@ async def request_payout(
     """Payouts are not needed in non-custodial mode.
 
     PayChains never holds your funds — payments are deposited directly
-    to addresses derived from your wallet's xpub key.
+    to your wallet address.
     """
     raise HTTPException(
         status_code=400,
         detail=(
             "Payouts are not needed with PayChains. "
-            "Funds are deposited directly to your wallet addresses "
-            "derived from your xpub key. No withdrawal required."
+            "Funds are deposited directly to your wallet address. "
+            "No withdrawal required."
         ),
     )

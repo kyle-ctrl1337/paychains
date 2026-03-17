@@ -64,10 +64,10 @@ Register at [paychains.dev/auth/register](/auth/register) to get your API keys. 
 
 ## 2. Configure your wallet
 
-Go to [Dashboard → Settings](/dashboard/settings) and enter your wallet's extended public key (xpub).
-PayChains derives unique deposit addresses from your xpub — your private keys never leave your wallet.
+Go to [Dashboard → Settings](/dashboard/settings) and paste your EVM wallet address (0x...).
+All payments will be sent directly to this address — your private keys never leave your wallet.
 
-Supported wallets: MetaMask, Ledger, Trezor, or any BIP-44 compatible wallet.
+Supported wallets: MetaMask, Coinbase Wallet, Ledger, Trezor, or any EVM wallet.
 
 ## 3. Install the SDK
 
@@ -291,10 +291,10 @@ const isValid = paychains.webhooks.verifySignature(
 			id: 'payouts',
 			title: 'Payouts',
 			content: `
-PayChains is non-custodial — payments go directly to your wallet addresses derived from your xpub key. No payout requests needed.
+PayChains is non-custodial — payments go directly to your wallet address. No payout requests needed.
 
 ### How it works
-When a customer pays, funds are sent to a unique deposit address derived from your extended public key. You have immediate access to all funds in your wallet.
+When a customer pays, funds are sent directly to your configured wallet address. You have immediate access to all funds in your wallet.
 
 ### List Historical Payouts
 \`GET /api/v1/payouts\`

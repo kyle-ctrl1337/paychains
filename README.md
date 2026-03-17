@@ -17,8 +17,8 @@ The non-custodial crypto billing API for SaaS. Recurring subscriptions, automati
 ### 1. Sign up
 Create an account at [paychains.dev](https://paychains.dev) to get your API keys.
 
-### 2. Set your xpub
-Go to Dashboard → Settings and add your wallet's extended public key.
+### 2. Set your wallet address
+Go to Dashboard → Settings and paste your EVM wallet address.
 
 ### 3. Accept payments
 
@@ -35,7 +35,7 @@ const payment = await pc.payments.create({
   chain: 'polygon',
   token: 'USDC'
 });
-// payment.deposit_address — derived from YOUR xpub
+// payment.deposit_address — your wallet address
 ```
 
 ## Self-Hosting

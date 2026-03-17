@@ -12,6 +12,7 @@
 	let saving = $state(false);
 	let savingXpub = $state(false);
 	let upgrading = $state(false);
+	let showAdvancedWallet = $state(false);
 
 	let apiKeyLive = $state('');
 	let apiKeyTest = $state('');
@@ -19,9 +20,6 @@
 	let rolling = $state(false);
 	let newKeys = $state<{ live: string; test: string } | null>(null);
 	let copiedKey = $state('');
-
-	// Address preview derived from xpub
-	let previewAddresses = $state<string[]>([]);
 
 	onMount(async () => {
 		auth.subscribe((state) => {
@@ -56,26 +54,8 @@
 		}
 	});
 
-	function generatePreviewAddresses(xpub: string) {
-		if (!xpub || xpub.length < 10) {
-			previewAddresses = [];
-			return;
-		}
-		// Client-side deterministic preview (matches backend fallback logic)
-		const addresses: string[] = [];
-		for (let i = 1; i <= 3; i++) {
-			const input = `${xpub}:${i}:ethereum`;
-			// Simple hash preview — actual derivation happens server-side
-			let hash = 0;
-			for (let j = 0; j < input.length; j++) {
-				const char = input.charCodeAt(j);
-				hash = ((hash << 5) - hash) + char;
-				hash |= 0;
-			}
-			const hex = Math.abs(hash).toString(16).padStart(40, '0').slice(0, 40);
-			addresses.push(`0x${hex}`);
-		}
-		previewAddresses = addresses;
+	function isPlainEvmAddress(value: string): boolean {
+		return /^0x[0-9a-fA-F]{40}$/.test(value);
 	}
 
 	async function saveSettings() {
@@ -190,48 +170,55 @@
 		<p class="text-[12px] text-surface-500 mt-3">Pay with crypto. Plans renew monthly.</p>
 	</div>
 
-	<!-- Wallet Configuration (xpub) -->
+	<!-- Wallet Configuration -->
 	<div class="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 mb-6">
 		<div class="flex items-center gap-2 mb-1">
 			<svg class="w-5 h-5 text-brand-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-			<h2 class="text-[15px] font-semibold">Wallet Configuration</h2>
+			<h2 class="text-[15px] font-semibold">Wallet Address</h2>
 		</div>
-		<p class="text-[12px] text-surface-400 mb-4">Provide your wallet's extended public key (xpub). PayChains derives unique deposit addresses from your xpub — your private keys never leave your wallet.</p>
+		<p class="text-[12px] text-surface-400 mb-4">Paste your EVM address (MetaMask, Coinbase Wallet, etc.). All payments will be sent directly to this address — your keys stay in your wallet.</p>
 
 		{#if !xpubKey && merchant}
 			<div class="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
 				<svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-				<span class="text-[12px] text-amber-300">Set your xpub key to start receiving payments directly to your wallet.</span>
+				<span class="text-[12px] text-amber-300">Set your wallet address to start receiving payments directly.</span>
 			</div>
 		{/if}
 
 		<div class="space-y-4">
 			<div>
-				<label class="block text-[12px] font-medium text-surface-400 mb-1.5">Extended Public Key (xpub)</label>
-				<textarea
+				<label class="block text-[12px] font-medium text-surface-400 mb-1.5">Wallet Address</label>
+				<input
 					bind:value={xpubKey}
-					oninput={() => generatePreviewAddresses(xpubKey)}
-					rows="3"
-					class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[13px] font-mono placeholder-surface-600 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all resize-none"
-					placeholder="xpub6CUGRUo..."
-				></textarea>
-				<p class="text-[11px] text-surface-500 mt-1.5">How to get your xpub: Open your wallet (MetaMask, Ledger, Trezor) → Settings → Export Extended Public Key</p>
+					class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[13px] font-mono placeholder-surface-600 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+					placeholder="0x..."
+				/>
+				<p class="text-[11px] text-surface-500 mt-1.5">Copy your address from MetaMask, Coinbase Wallet, or any EVM wallet.</p>
+				{#if xpubKey && !isPlainEvmAddress(xpubKey) && !xpubKey.startsWith('xpub')}
+					<p class="text-[11px] text-red-400 mt-1">Invalid address format. Paste a 0x... address (42 characters).</p>
+				{/if}
 			</div>
 
-			{#if previewAddresses.length > 0}
-				<div class="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
-					<p class="text-[11px] font-medium text-surface-400 mb-2">Preview — addresses that will be generated for payments:</p>
-					<div class="space-y-1">
-						{#each previewAddresses as addr, i}
-							<div class="flex items-center gap-2 text-[11px] font-mono text-surface-500">
-								<span class="text-surface-600">{i + 1}.</span>
-								<span>{addr}</span>
-							</div>
-						{/each}
+			<!-- Advanced: xpub option -->
+			<div>
+				<button onclick={() => showAdvancedWallet = !showAdvancedWallet}
+					class="flex items-center gap-1.5 text-[11px] text-surface-500 hover:text-surface-400 transition-colors">
+					<svg class="w-3.5 h-3.5 transition-transform {showAdvancedWallet ? 'rotate-90' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+					Advanced: use xpub for unique addresses per payment (Ledger, Trezor)
+				</button>
+				{#if showAdvancedWallet}
+					<div class="mt-3 pl-5 border-l border-white/[0.06]">
+						<label class="block text-[12px] font-medium text-surface-400 mb-1.5">Extended Public Key (xpub)</label>
+						<textarea
+							bind:value={xpubKey}
+							rows="3"
+							class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[13px] font-mono placeholder-surface-600 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all resize-none"
+							placeholder="xpub6CUGRUo..."
+						></textarea>
+						<p class="text-[11px] text-surface-500 mt-1.5">Export from Ledger Live or Trezor Suite. Generates a unique deposit address per payment.</p>
 					</div>
-					<p class="text-[10px] text-surface-600 mt-2">Verify these match your wallet to confirm setup is correct.</p>
-				</div>
-			{/if}
+				{/if}
+			</div>
 
 			<button onclick={saveXpub} disabled={savingXpub}
 				class="px-4 py-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-50 rounded-lg text-[13px] font-semibold transition-all">

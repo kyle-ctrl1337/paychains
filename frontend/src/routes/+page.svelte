@@ -45,7 +45,7 @@
 		},
 		{
 			title: 'Your Wallet, Your Keys',
-			description: 'Provide your wallet\'s extended public key (xpub) and we derive unique deposit addresses. Your private keys never leave your wallet.',
+			description: 'Paste your wallet address and payments go directly to you. Your private keys never leave your wallet.',
 			icon: 'wallet'
 		}
 	];

@@ -83,17 +83,32 @@ def derive_bitcoin_address(seed: bytes, account_index: int, address_index: int) 
     return address, private_key
 
 
+def is_plain_evm_address(value: str) -> bool:
+    """Check if value is a plain EVM address (0x + 40 hex chars)."""
+    return bool(value and value.startswith("0x") and len(value) == 42)
+
+
 def derive_address_from_xpub(xpub: str, index: int, chain: str = "ethereum") -> str:
     """
-    Derive a deposit address from a merchant's extended public key.
-    We only have the PUBLIC key — we can generate addresses but CANNOT spend funds.
-    The merchant controls the private keys in their own wallet.
+    Derive a deposit address from a merchant's wallet key.
+
+    Supports two modes:
+    - Plain EVM address (0x...): used directly for all payments (no derivation)
+    - xpub key: HD derivation of unique address per payment (advanced)
     """
     import hashlib
     from eth_utils import to_checksum_address
 
     chain = chain.lower()
 
+    # Plain EVM address — use directly, no derivation needed
+    if is_plain_evm_address(xpub):
+        if chain in ("ethereum", "polygon", "bsc", "arbitrum", "base"):
+            return to_checksum_address(xpub)
+        else:
+            raise ValueError(f"Plain EVM address cannot be used for {chain}")
+
+    # xpub HD derivation
     if chain in ("ethereum", "polygon", "bsc", "arbitrum", "base"):
         try:
             bip44 = Bip44.FromExtendedKey(xpub, Bip44Coins.ETHEREUM)

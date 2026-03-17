@@ -1,14 +1,10 @@
 <script>
 	import { auth } from '$lib/stores/auth';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 
-	onMount(() => {
-		auth.subscribe((state) => {
-			if (state.token) {
-				goto('/dashboard');
-			}
-		});
+	let isLoggedIn = $state(false);
+
+	auth.subscribe((state) => {
+		isLoggedIn = !!state.token;
 	});
 
 	const chains = [
@@ -82,16 +78,22 @@
 			<div class="hidden md:flex items-center gap-8 text-[13px] text-surface-400">
 				<a href="#features" class="hover:text-white transition-colors">Features</a>
 				<a href="#pricing" class="hover:text-white transition-colors">Pricing</a>
-				<a href="https://docs.paychains.dev" class="hover:text-white transition-colors">Docs</a>
+				<a href="/docs" class="hover:text-white transition-colors">Docs</a>
 			</div>
 
 			<div class="flex items-center gap-3">
-				<a href="/auth/login" class="text-[13px] font-medium text-surface-300 hover:text-white px-3 py-1.5 transition-colors">
-					Log in
-				</a>
-				<a href="/auth/register" class="text-[13px] font-medium bg-brand-500 hover:bg-brand-400 text-white px-4 py-1.5 rounded-lg transition-all hover:shadow-lg hover:shadow-brand-500/20">
-					Get API Keys
-				</a>
+				{#if isLoggedIn}
+					<a href="/dashboard" class="text-[13px] font-medium bg-brand-500 hover:bg-brand-400 text-white px-4 py-1.5 rounded-lg transition-all hover:shadow-lg hover:shadow-brand-500/20">
+						Dashboard
+					</a>
+				{:else}
+					<a href="/auth/login" class="text-[13px] font-medium text-surface-300 hover:text-white px-3 py-1.5 transition-colors">
+						Log in
+					</a>
+					<a href="/auth/register" class="text-[13px] font-medium bg-brand-500 hover:bg-brand-400 text-white px-4 py-1.5 rounded-lg transition-all hover:shadow-lg hover:shadow-brand-500/20">
+						Get API Keys
+					</a>
+				{/if}
 			</div>
 		</div>
 	</nav>
@@ -367,7 +369,7 @@ console.<span class="token-function">log</span>(payment.<span class="token-prope
 			<div class="flex items-center gap-6 text-[12px] text-surface-500">
 				<a href="#features" class="hover:text-surface-300 transition-colors">Features</a>
 				<a href="#pricing" class="hover:text-surface-300 transition-colors">Pricing</a>
-				<a href="https://docs.paychains.dev" class="hover:text-surface-300 transition-colors">Documentation</a>
+				<a href="/docs" class="hover:text-surface-300 transition-colors">Documentation</a>
 				<a href="mailto:support@paychains.dev" class="hover:text-surface-300 transition-colors">Support</a>
 			</div>
 			<p class="text-[11px] text-surface-600">&copy; 2026 PayChains. All rights reserved.</p>

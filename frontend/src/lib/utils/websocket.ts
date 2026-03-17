@@ -1,7 +1,8 @@
 export function createPaymentSocket(paymentId: string, onUpdate: (data: any) => void) {
 	// WebSocket for real-time payment status updates
 	// Will connect to backend WS endpoint in Phase 3
-	const wsUrl = `ws://localhost:8000/ws/payments/${paymentId}`;
+	const wsBase = import.meta.env.VITE_WS_URL || 'wss://backend-api-production-ab9c.up.railway.app';
+	const wsUrl = `${wsBase}/ws/payments/${paymentId}`;
 
 	let ws: WebSocket | null = null;
 	let reconnectTimer: ReturnType<typeof setTimeout>;

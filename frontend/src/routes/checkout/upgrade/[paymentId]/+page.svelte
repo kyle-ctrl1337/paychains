@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { api } from '$lib/api/client';
+	import QRCode from 'qrcode';
 
 	let paymentId = $state('');
 	let payment = $state<any>(null);
@@ -13,6 +14,7 @@
 	let timeRemaining = $state('');
 	let timeWarning = $state(false);
 	let copied = $state(false);
+	let qrDataUrl = $state('');
 	let pollInterval: ReturnType<typeof setInterval>;
 	let countdownInterval: ReturnType<typeof setInterval>;
 
@@ -37,6 +39,9 @@
 			// Use public status endpoint — the upgrading merchant doesn't own this payment
 			payment = await api.checkPaymentStatus(paymentId);
 			paymentStatus = payment.status;
+			if (payment.deposit_address) {
+				qrDataUrl = await QRCode.toDataURL(payment.deposit_address, { width: 200, margin: 2, color: { dark: '#000000', light: '#ffffff' } });
+			}
 			if (payment.status === 'pending' || payment.status === 'confirming') {
 				startPolling();
 				startCountdown();
@@ -176,6 +181,15 @@
 						</div>
 					{/if}
 
+					<!-- QR Code -->
+					{#if qrDataUrl && (paymentStatus === 'pending' || paymentStatus === 'confirming')}
+						<div class="flex justify-center">
+							<div class="rounded-xl bg-white p-3">
+								<img src={qrDataUrl} alt="Deposit address QR code" class="w-44 h-44" />
+							</div>
+						</div>
+					{/if}
+
 					<!-- Deposit Address -->
 					<div class="rounded-xl bg-surface-950/60 border border-white/[0.04] p-4">
 						<div class="flex items-center justify-between mb-2">
@@ -233,7 +247,11 @@
 			</div>
 		{/if}
 
-		<div class="text-center mt-6">
+		<div class="flex items-center justify-between mt-6 px-2">
+			<a href="/dashboard/settings" class="inline-flex items-center gap-1.5 text-xs text-surface-400 hover:text-surface-300 transition-colors">
+				<svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+				Back to Settings
+			</a>
 			<a href="/" class="inline-flex items-center gap-1.5 text-xs text-surface-500 hover:text-surface-400 transition-colors">
 				Powered by <span class="font-semibold text-brand-400">PayChains</span>
 			</a>

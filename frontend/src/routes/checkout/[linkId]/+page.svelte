@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { formatUSD } from '$lib/utils/format';
 	import { api } from '$lib/api/client';
+	import QRCode from 'qrcode';
 
 	let linkId = $state('');
 	let checkoutData = $state<any>(null);
@@ -19,6 +20,7 @@
 	let timeRemaining = $state('');
 	let timeWarning = $state(false);
 	let copied = $state(false);
+	let qrDataUrl = $state('');
 
 	const comingSoonChains = ['solana', 'bitcoin'];
 
@@ -64,6 +66,9 @@
 				token: selectedToken
 			});
 			paymentStatus = 'pending';
+			if (paymentResult.deposit_address) {
+				qrDataUrl = await QRCode.toDataURL(paymentResult.deposit_address, { width: 200, margin: 2, color: { dark: '#000000', light: '#ffffff' } });
+			}
 			startPolling();
 			startCountdown();
 		} catch (e: any) {
@@ -194,14 +199,10 @@
 					{/if}
 
 					<!-- QR Code -->
-					{#if paymentResult.qr_code_base64}
+					{#if qrDataUrl && (paymentStatus === 'pending' || paymentStatus === 'confirming')}
 						<div class="flex justify-center">
 							<div class="rounded-xl bg-white p-3">
-								<img
-									src="data:image/png;base64,{paymentResult.qr_code_base64}"
-									alt="QR Code"
-									class="w-44 h-44"
-								/>
+								<img src={qrDataUrl} alt="Deposit address QR code" class="w-44 h-44" />
 							</div>
 						</div>
 					{/if}

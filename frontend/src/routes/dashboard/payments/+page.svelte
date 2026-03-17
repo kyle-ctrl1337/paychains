@@ -29,6 +29,22 @@
 			loading = false;
 		}
 	}
+
+	function exportCSV() {
+		if (!payments.length) return;
+		const headers = ['ID', 'Status', 'Amount USD', 'Token', 'Chain', 'Deposit Address', 'TX Hash', 'Created At'];
+		const rows = payments.map(p => [
+			p.id, p.status, p.amount_usd, p.token, p.chain, p.deposit_address, p.tx_hash || '', p.created_at
+		]);
+		const csv = [headers, ...rows].map(r => r.map((c: string) => `"${c}"`).join(',')).join('\n');
+		const blob = new Blob([csv], { type: 'text/csv' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `paychains-payments-${new Date().toISOString().slice(0, 10)}.csv`;
+		a.click();
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <div>
@@ -38,6 +54,15 @@
 			<p class="text-[13px] text-surface-400 mt-1">All payment transactions across chains</p>
 		</div>
 		<div class="flex gap-2">
+			{#if payments.length > 0}
+				<button
+					onclick={exportCSV}
+					class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-white/[0.08] rounded-lg text-[12px] font-medium text-surface-300 hover:bg-white/[0.04] transition-colors"
+				>
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					CSV
+				</button>
+			{/if}
 			<select bind:value={statusFilter}
 				class="px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[13px] text-surface-300 outline-none focus:border-brand-500/40">
 				<option value="">All statuses</option>

@@ -10,7 +10,7 @@ from app.models.merchant import Merchant
 from app.models.payment import Payment
 from app.models.payment_link import PaymentLink
 from app.schemas.payment import CheckoutInitiate, CheckoutStatusResponse
-from app.services.payment_service import create_payment_session
+from app.services.payment_service import create_payment_session, COMING_SOON_CHAINS
 from app.utils.qrcode import generate_qr_code_base64
 
 router = APIRouter(prefix="/checkout", tags=["Checkout"])
@@ -66,6 +66,8 @@ async def initiate_checkout(
     chain = data.chain.lower()
     token = data.token.upper()
 
+    if chain in COMING_SOON_CHAINS:
+        raise HTTPException(status_code=400, detail=f"{chain.capitalize()} support is coming soon")
     if chain not in link.accepted_chains:
         raise HTTPException(status_code=400, detail=f"Chain '{chain}' not accepted")
     if token not in link.accepted_tokens:

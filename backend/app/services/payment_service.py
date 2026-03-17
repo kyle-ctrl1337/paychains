@@ -8,7 +8,7 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.blockchain.wallet import generate_deposit_address
+from app.blockchain.wallet import derive_address_from_xpub
 from app.config import get_settings
 from app.models.merchant import Merchant
 from app.models.payment import Payment
@@ -27,10 +27,14 @@ CONFIRMATIONS = {
     "bitcoin": 3,
 }
 
-FEES = {
-    "free": Decimal("0.02"),
-    "pro": Decimal("0.01"),
-    "enterprise": Decimal("0.005"),
+# Chains that are fully supported — others show "Coming Soon"
+SUPPORTED_CHAINS = {"ethereum", "polygon", "bsc", "arbitrum", "base"}
+COMING_SOON_CHAINS = {"solana", "bitcoin"}
+
+PLAN_PAYMENT_LIMITS = {
+    "free": 100,
+    "pro": 2000,
+    "enterprise": 999999,
 }
 
 
@@ -57,42 +61,49 @@ async def create_payment_session(
     subscription_id: uuid.UUID | None = None,
     metadata: dict | None = None,
 ) -> Payment:
-    """Create a payment with a unique HD-wallet deposit address."""
+    """Create a payment with a deposit address derived from merchant's xpub (non-custodial)."""
     chain = chain.lower()
     token = token.upper()
 
     if chain not in CONFIRMATIONS:
         raise ValueError(f"Unsupported chain: {chain}")
 
+    if chain in COMING_SOON_CHAINS:
+        raise ValueError(f"{chain.capitalize()} support is coming soon")
+
+    # Check plan payment limits
+    start_of_month = datetime.now(timezone.utc).replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )
+    payment_count = await db.scalar(
+        select(func.count(Payment.id))
+        .where(Payment.merchant_id == merchant.id)
+        .where(Payment.created_at >= start_of_month)
+    )
+    limit = PLAN_PAYMENT_LIMITS.get(merchant.plan, 100)
+    if (payment_count or 0) >= limit:
+        raise ValueError(
+            f"Monthly payment limit reached ({limit} payments). "
+            f"Upgrade your plan at paychains.dev/dashboard/settings"
+        )
+
     # Convert USD to crypto amount
     amount_crypto = await usd_to_crypto(amount_usd, token)
-    fee_pct = FEES.get(merchant.plan, Decimal("0.02"))
 
-    # Generate unique deposit address via HD wallet
-    merchant_idx = await get_merchant_index(db, merchant.id)
+    # Derive deposit address from merchant's xpub (non-custodial)
     payment_idx = await get_next_payment_index(db, merchant.id)
 
-    if settings.wallet_encryption_key and settings.wallet_master_seed:
-        # Use real HD wallet derivation
-        master_seed_encrypted = bytes.fromhex(settings.wallet_master_seed)
-        address, _private_key = generate_deposit_address(
-            master_seed_encrypted,
-            settings.wallet_encryption_key,
-            chain,
-            merchant_idx,
-            payment_idx,
-        )
+    if merchant.xpub_key:
+        address = derive_address_from_xpub(merchant.xpub_key, payment_idx, chain)
     else:
-        # Fallback for development — deterministic but not real HD wallet
+        # Fallback: deterministic placeholder for testing
         import hashlib
-        seed_material = f"{chain}:{merchant_idx}:{payment_idx}"
-        addr_hash = hashlib.sha256(seed_material.encode()).hexdigest()
+        hash_input = f"{merchant.id}:{payment_idx}:{chain}"
+        addr_hash = hashlib.sha256(hash_input.encode()).hexdigest()
         if chain in ("ethereum", "polygon", "bsc", "arbitrum", "base"):
             address = f"0x{addr_hash[:40]}"
         elif chain == "bitcoin":
             address = f"bc1q{addr_hash[:38]}"
-        elif chain == "solana":
-            address = addr_hash[:44]
         else:
             address = f"0x{addr_hash[:40]}"
 
@@ -106,8 +117,8 @@ async def create_payment_session(
         chain=chain,
         deposit_address=address,
         required_confirmations=CONFIRMATIONS[chain],
-        fee_percentage=fee_pct,
-        fee_amount_usd=amount_usd * fee_pct,
+        fee_percentage=Decimal("0"),
+        fee_amount_usd=Decimal("0"),
         expires_at=datetime.now(timezone.utc) + timedelta(minutes=30),
         metadata_=metadata or {},
     )

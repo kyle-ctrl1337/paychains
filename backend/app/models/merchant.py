@@ -23,6 +23,7 @@ class Merchant(Base):
     webhook_secret: Mapped[str] = mapped_column(String(64), nullable=False)
     auto_convert_to: Mapped[str] = mapped_column(String(20), default="USDC")
     settlement_address: Mapped[dict] = mapped_column(JSONB, default=dict)
+    xpub_key: Mapped[str | None] = mapped_column(Text, nullable=True)
     plan: Mapped[str] = mapped_column(String(20), default="free")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)

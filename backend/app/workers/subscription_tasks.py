@@ -33,11 +33,6 @@ CONFIRMATIONS = {
     "arbitrum": 1, "base": 1, "solana": 1, "bitcoin": 3,
 }
 
-FEES = {
-    "free": Decimal("0.02"),
-    "pro": Decimal("0.01"),
-    "enterprise": Decimal("0.005"),
-}
 
 
 def _get_sync_session():
@@ -95,23 +90,25 @@ def process_subscription_payment(self, subscription_id: str):
         # Determine chain and token
         chain = sub.preferred_chain or "polygon"
         token = sub.preferred_token or "USDC"
-        fee_pct = FEES.get(merchant.plan, Decimal("0.02"))
 
-        # Create a payment record for this billing cycle
+        # Derive deposit address from merchant's xpub (non-custodial)
         import hashlib
-        idx = int(hashlib.sha256(str(sub.id).encode()).hexdigest()[:8], 16) % (2**31)
         payment_count = session.query(Payment).filter_by(subscription_id=sub.id).count()
-        seed_material = f"{chain}:{idx}:{payment_count + 1}"
-        addr_hash = hashlib.sha256(seed_material.encode()).hexdigest()
+        payment_idx = payment_count + 1
 
-        if chain in ("ethereum", "polygon", "bsc", "arbitrum", "base"):
-            deposit_address = f"0x{addr_hash[:40]}"
-        elif chain == "bitcoin":
-            deposit_address = f"bc1q{addr_hash[:38]}"
-        elif chain == "solana":
-            deposit_address = addr_hash[:44]
+        if merchant.xpub_key:
+            from app.blockchain.wallet import derive_address_from_xpub
+            deposit_address = derive_address_from_xpub(merchant.xpub_key, payment_idx, chain)
         else:
-            deposit_address = f"0x{addr_hash[:40]}"
+            # Fallback for testing
+            hash_input = f"{merchant.id}:{payment_idx}:{chain}"
+            addr_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+            if chain in ("ethereum", "polygon", "bsc", "arbitrum", "base"):
+                deposit_address = f"0x{addr_hash[:40]}"
+            elif chain == "bitcoin":
+                deposit_address = f"bc1q{addr_hash[:38]}"
+            else:
+                deposit_address = f"0x{addr_hash[:40]}"
 
         payment = Payment(
             merchant_id=merchant.id,
@@ -122,8 +119,8 @@ def process_subscription_payment(self, subscription_id: str):
             chain=chain,
             deposit_address=deposit_address,
             required_confirmations=CONFIRMATIONS.get(chain, 3),
-            fee_percentage=fee_pct,
-            fee_amount_usd=sub.amount_usd * fee_pct,
+            fee_percentage=Decimal("0"),
+            fee_amount_usd=Decimal("0"),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=48),
         )
         session.add(payment)

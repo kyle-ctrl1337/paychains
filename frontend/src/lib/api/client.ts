@@ -112,5 +112,15 @@ export const api = {
 	adminPayments: (token: string) => request<any[]>('/admin/payments', { token }),
 
 	adminUpdateMerchant: (token: string, merchantId: string, data: any) =>
-		request<any>(`/admin/merchants/${merchantId}`, { method: 'PATCH', token, body: data })
+		request<any>(`/admin/merchants/${merchantId}`, { method: 'PATCH', token, body: data }),
+
+	// Checkout (public, no auth required)
+	getCheckout: (linkId: string) =>
+		request<any>(`/checkout/${linkId}`),
+
+	initiateCheckout: (linkId: string, data: { chain: string; token: string }) =>
+		request<any>(`/checkout/${linkId}/initiate`, { method: 'POST', body: data }),
+
+	checkPaymentStatus: (paymentId: string) =>
+		request<any>(`/checkout/status/${paymentId}`)
 };

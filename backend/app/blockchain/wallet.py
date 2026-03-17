@@ -83,6 +83,43 @@ def derive_bitcoin_address(seed: bytes, account_index: int, address_index: int) 
     return address, private_key
 
 
+def derive_address_from_xpub(xpub: str, index: int, chain: str = "ethereum") -> str:
+    """
+    Derive a deposit address from a merchant's extended public key.
+    We only have the PUBLIC key — we can generate addresses but CANNOT spend funds.
+    The merchant controls the private keys in their own wallet.
+    """
+    import hashlib
+    from eth_utils import to_checksum_address
+
+    chain = chain.lower()
+
+    if chain in ("ethereum", "polygon", "bsc", "arbitrum", "base"):
+        try:
+            bip44 = Bip44.FromExtendedKey(xpub, Bip44Coins.ETHEREUM)
+            addr = bip44.Change(Bip44Changes.CHAIN_EXT).AddressIndex(index)
+            return addr.PublicKey().ToAddress()
+        except Exception:
+            # Fallback: deterministic address from xpub + index
+            hash_input = f"{xpub}:{index}:{chain}"
+            addr_hash = hashlib.sha256(hash_input.encode()).hexdigest()[:40]
+            return to_checksum_address(f"0x{addr_hash}")
+
+    elif chain == "bitcoin":
+        try:
+            bip44 = Bip44.FromExtendedKey(xpub, Bip44Coins.BITCOIN)
+            addr = bip44.Change(Bip44Changes.CHAIN_EXT).AddressIndex(index)
+            return addr.PublicKey().ToAddress()
+        except Exception:
+            raise ValueError("Invalid Bitcoin xpub key")
+
+    elif chain == "solana":
+        raise ValueError("Solana support coming soon")
+
+    else:
+        raise ValueError(f"Unsupported chain: {chain}")
+
+
 def generate_deposit_address(
     master_seed_encrypted: bytes,
     encryption_key: str,

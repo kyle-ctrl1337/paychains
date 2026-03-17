@@ -2,7 +2,56 @@
 	import { auth } from '$lib/stores/auth';
 
 	let isLoggedIn = $state(false);
-	auth.subscribe((s) => (isLoggedIn = !!s.token));
+	let testApiKey = $state('');
+	let tryItEndpoint = $state('');
+	let tryItMethod = $state('GET');
+	let tryItBody = $state('');
+	let tryItResponse = $state('');
+	let tryItLoading = $state(false);
+	let tryItStatus = $state(0);
+
+	auth.subscribe((s) => {
+		isLoggedIn = !!s.token;
+		if (s.apiKeyTest) testApiKey = s.apiKeyTest;
+	});
+
+	const API_BASE = import.meta.env.VITE_API_URL || 'https://backend-api-production-ab9c.up.railway.app/api/v1';
+
+	async function runTryIt() {
+		if (!testApiKey || !tryItEndpoint) return;
+		tryItLoading = true;
+		tryItResponse = '';
+		tryItStatus = 0;
+		try {
+			const opts: RequestInit = {
+				method: tryItMethod,
+				headers: {
+					'X-API-Key': testApiKey,
+					'Content-Type': 'application/json'
+				}
+			};
+			if (tryItMethod !== 'GET' && tryItBody.trim()) {
+				opts.body = tryItBody;
+			}
+			const res = await fetch(`${API_BASE}${tryItEndpoint}`, opts);
+			tryItStatus = res.status;
+			const data = await res.json().catch(() => null);
+			tryItResponse = JSON.stringify(data, null, 2);
+		} catch (e: any) {
+			tryItResponse = `Error: ${e.message}`;
+			tryItStatus = 0;
+		} finally {
+			tryItLoading = false;
+		}
+	}
+
+	function openTryIt(method: string, endpoint: string, body?: string) {
+		tryItMethod = method;
+		tryItEndpoint = endpoint;
+		tryItBody = body || '';
+		tryItResponse = '';
+		tryItStatus = 0;
+	}
 
 	const sections = [
 		{
@@ -13,7 +62,14 @@
 
 Register at [paychains.dev/auth/register](/auth/register) to get your API keys. You'll receive a **live key** (\`pc_live_...\`) and a **test key** (\`pc_test_...\`).
 
-## 2. Install the SDK
+## 2. Configure your wallet
+
+Go to [Dashboard → Settings](/dashboard/settings) and enter your wallet's extended public key (xpub).
+PayChains derives unique deposit addresses from your xpub — your private keys never leave your wallet.
+
+Supported wallets: MetaMask, Ledger, Trezor, or any BIP-44 compatible wallet.
+
+## 3. Install the SDK
 
 \`\`\`bash
 npm install paychains
@@ -23,16 +79,38 @@ pip install paychains
 
 Or use the REST API directly — all endpoints accept JSON and return JSON.
 
-## 3. Create your first payment
+## 4. Make your first API call
 
-\`\`\`bash
-curl -X POST https://api.paychains.dev/api/v1/payments/create \\
-  -H "X-API-Key: pc_test_YOUR_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"amount_usd": 25.00, "chain": "ethereum", "token": "USDC"}'
+\`\`\`javascript
+import PayChains from 'paychains';
+
+const pc = new PayChains({ apiKey: 'pc_test_YOUR_KEY' });
+
+const payment = await pc.payments.create({
+  amount_usd: 25.00,
+  chain: 'polygon',
+  token: 'USDC'
+});
+
+console.log(payment.deposit_address); // 0x7a3b...
+console.log(payment.id);             // uuid
 \`\`\`
 
-Response includes a unique \`deposit_address\` for the customer to send funds to.`
+### Python
+
+\`\`\`python
+from paychains import PayChains
+
+pc = PayChains(api_key="pc_test_YOUR_KEY")
+
+payment = pc.payments.create(
+    amount_usd=25.00,
+    chain="polygon",
+    token="USDC"
+)
+
+print(payment["deposit_address"])
+\`\`\``
 		},
 		{
 			id: 'authentication',
@@ -46,7 +124,20 @@ X-API-Key: pc_live_your_api_key_here
 
 **Test vs Live keys**: Use \`pc_test_...\` keys for development. Test payments are processed on testnets. Use \`pc_live_...\` keys for production.
 
-The merchant dashboard uses JWT authentication via the \`Authorization: Bearer <token>\` header, obtained through the login endpoint.`
+### Rate Limits
+
+| Plan | Rate Limit |
+|------|-----------|
+| Free | 100 req/min |
+| Pro | 1,000 req/min |
+| Enterprise | 5,000 req/min |
+
+Rate limit headers are included in every response:
+\`\`\`
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1679012345
+\`\`\``
 		},
 		{
 			id: 'payments',
@@ -58,24 +149,37 @@ The merchant dashboard uses JWT authentication via the \`Authorization: Bearer <
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | amount_usd | number | Yes | Amount in USD |
-| chain | string | Yes | ethereum, polygon, bsc, arbitrum, base, solana, bitcoin |
-| token | string | Yes | USDC, USDT, ETH, BTC, SOL, MATIC, BNB |
-| metadata | object | No | Custom metadata |
+| chain | string | Yes | ethereum, polygon, bsc, arbitrum, base |
+| token | string | Yes | USDC, USDT, ETH, MATIC, BNB |
+| metadata | object | No | Custom key-value metadata |
+| payment_link_id | string | No | Link to a payment link |
+
+**Note:** Solana and Bitcoin are coming soon.
 
 ### List Payments
 \`GET /api/v1/payments\`
 
-Query params: \`status\`, \`chain\`, \`limit\`, \`offset\`
+Query params: \`status\`, \`chain\`, \`page\`, \`per_page\`
 
 ### Get Payment
 \`GET /api/v1/payments/{id}\`
 
+### Refund Payment
+\`POST /api/v1/payments/{id}/refund\`
+
+Only completed payments can be refunded.
+
 ### Payment Statuses
-- **pending** — Waiting for customer payment
-- **confirming** — Transaction detected, awaiting confirmations
+- **pending** — Waiting for customer to send funds
+- **confirming** — Transaction detected on-chain, awaiting confirmations
 - **completed** — Payment confirmed and settled
 - **failed** — Payment failed
-- **expired** — Payment window expired (30 minutes)`
+- **expired** — Payment window expired (30 minutes)
+- **refunded** — Payment has been refunded`,
+			tryEndpoints: [
+				{ label: 'Create Payment', method: 'POST', endpoint: '/payments/create', body: '{\n  "amount_usd": 10.00,\n  "chain": "polygon",\n  "token": "USDC"\n}' },
+				{ label: 'List Payments', method: 'GET', endpoint: '/payments' }
+			]
 		},
 		{
 			id: 'payment-links',
@@ -86,14 +190,18 @@ Query params: \`status\`, \`chain\`, \`limit\`, \`offset\`
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| title | string | Yes | Display name |
+| title | string | Yes | Display name shown on checkout |
 | description | string | No | Description shown to customer |
-| amount_usd | number | No | Fixed amount (omit for custom) |
+| amount_usd | number | No | Fixed amount (omit for custom amount) |
 
 ### List Payment Links
 \`GET /api/v1/payment-links\`
 
-Payment links generate a hosted checkout page at \`/checkout/{link_id}\` that customers can use to pay.`
+Payment links generate a hosted checkout page at \`/checkout/{link_id}\` that customers can use to select a chain, token, and pay via QR code.`,
+			tryEndpoints: [
+				{ label: 'Create Link', method: 'POST', endpoint: '/payment-links', body: '{\n  "title": "Test Product",\n  "amount_usd": 9.99\n}' },
+				{ label: 'List Links', method: 'GET', endpoint: '/payment-links' }
+			]
 		},
 		{
 			id: 'subscriptions',
@@ -105,15 +213,21 @@ Payment links generate a hosted checkout page at \`/checkout/{link_id}\` that cu
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | plan_name | string | Yes | Plan display name |
-| amount_usd | number | Yes | Recurring amount |
+| amount_usd | number | Yes | Recurring amount in USD |
 | interval | string | Yes | weekly, monthly, quarterly, yearly |
-| customer_email | string | No | Customer email |
+| customer_email | string | No | Customer email for notifications |
 | customer_wallet | string | No | Customer wallet address |
+| preferred_chain | string | No | Default chain for billing |
+| preferred_token | string | No | Default token for billing |
 
 ### List Subscriptions
 \`GET /api/v1/subscriptions\`
 
-Subscriptions are automatically billed on schedule. Failed payments trigger retry logic with exponential backoff.`
+Subscriptions are automatically billed on schedule. Failed payments trigger retry logic with exponential backoff (up to 3 retries).`,
+			tryEndpoints: [
+				{ label: 'Create Subscription', method: 'POST', endpoint: '/subscriptions', body: '{\n  "plan_name": "Pro Plan",\n  "amount_usd": 49.99,\n  "interval": "monthly",\n  "customer_email": "test@example.com"\n}' },
+				{ label: 'List Subscriptions', method: 'GET', endpoint: '/subscriptions' }
+			]
 		},
 		{
 			id: 'webhooks',
@@ -125,50 +239,96 @@ Configure your webhook URL in [Settings](/dashboard/settings). PayChains sends P
 \`\`\`json
 {
   "event": "payment.completed",
-  "payment_id": "uuid",
-  "amount_usd": "25.00",
-  "token": "USDC",
-  "chain": "ethereum",
-  "tx_hash": "0x...",
+  "data": {
+    "payment_id": "uuid",
+    "status": "completed",
+    "amount_usd": "25.00",
+    "token": "USDC",
+    "chain": "ethereum",
+    "tx_hash": "0x...",
+    "deposit_address": "0x...",
+    "confirmations": 5
+  },
   "timestamp": "2026-03-17T00:00:00Z"
 }
 \`\`\`
 
 ### Verifying Signatures
-The webhook secret is provided during registration. Verify using:
+
+\`\`\`javascript
+import { createHmac } from 'crypto';
+
+function verify(body, signature, secret) {
+  const expected = createHmac('sha256', secret)
+    .update(body)
+    .digest('hex');
+  return expected === signature;
+}
 \`\`\`
-HMAC-SHA256(webhook_secret, request_body)
+
+Or use the SDK:
+\`\`\`javascript
+const isValid = paychains.webhooks.verifySignature(
+  requestBody, headers['x-signature'], webhookSecret
+);
 \`\`\`
-Compare with the \`X-Signature\` header.
 
 ### Events
-- \`payment.pending\` — Payment created
-- \`payment.confirming\` — Transaction detected
-- \`payment.completed\` — Payment settled
+- \`payment.pending\` — Payment created, waiting for funds
+- \`payment.confirming\` — Transaction detected on-chain
+- \`payment.completed\` — Payment fully confirmed
 - \`payment.failed\` — Payment failed
-- \`payment.expired\` — Payment expired
-- \`subscription.created\` — New subscription
+- \`payment.expired\` — Payment expired (30 min window)
+- \`subscription.created\` — New subscription created
 - \`subscription.payment_due\` — Recurring payment initiated
-- \`subscription.cancelled\` — Subscription cancelled`
+- \`subscription.cancelled\` — Subscription cancelled`,
+			tryEndpoints: [
+				{ label: 'List Events', method: 'GET', endpoint: '/webhooks/events' },
+				{ label: 'Send Test', method: 'POST', endpoint: '/webhooks/test' }
+			]
 		},
 		{
 			id: 'payouts',
 			title: 'Payouts',
 			content: `
-### Request Payout
-\`POST /api/v1/payouts/request\`
+PayChains is non-custodial — payments go directly to your wallet addresses derived from your xpub key. No payout requests needed.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| amount | number | Yes | Amount to withdraw |
-| token | string | Yes | Token to withdraw |
-| chain | string | Yes | Chain to withdraw on |
-| destination_address | string | Yes | Wallet to send to |
+### How it works
+When a customer pays, funds are sent to a unique deposit address derived from your extended public key. You have immediate access to all funds in your wallet.
 
-### List Payouts
+### List Historical Payouts
 \`GET /api/v1/payouts\`
 
-Payouts are processed within 24 hours. Minimum payout amount is $10.`
+Returns historical payout records (legacy). New payments are deposited directly to your wallet.`,
+			tryEndpoints: [
+				{ label: 'List Payouts', method: 'GET', endpoint: '/payouts' }
+			]
+		},
+		{
+			id: 'analytics',
+			title: 'Analytics',
+			content: `
+### Overview
+\`GET /api/v1/analytics/overview\`
+
+Query params: \`days\` (default: 30)
+
+Returns total volume, payment count, and success rate for the specified period.
+
+### By Chain
+\`GET /api/v1/analytics/by-chain\`
+
+Returns payment volume breakdown by blockchain.
+
+### By Token
+\`GET /api/v1/analytics/by-token\`
+
+Returns payment volume breakdown by token.`,
+			tryEndpoints: [
+				{ label: 'Overview', method: 'GET', endpoint: '/analytics/overview' },
+				{ label: 'By Chain', method: 'GET', endpoint: '/analytics/by-chain' },
+				{ label: 'By Token', method: 'GET', endpoint: '/analytics/by-token' }
+			]
 		},
 		{
 			id: 'websockets',
@@ -181,11 +341,82 @@ const ws = new WebSocket('wss://api.paychains.dev/ws/payments/{payment_id}');
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  console.log(data.status, data.confirmations);
+  console.log(data.status);         // "confirming"
+  console.log(data.confirmations);  // 3
+  console.log(data.required_confirmations); // 5
+};
+
+ws.onclose = () => {
+  // Payment reached terminal state
 };
 \`\`\`
 
-The WebSocket sends updates whenever the payment status or confirmation count changes, and automatically closes when the payment reaches a terminal state.`
+The WebSocket sends a JSON message whenever the payment status or confirmation count changes. It automatically closes when the payment reaches a terminal state (\`completed\`, \`failed\`, \`expired\`, \`refunded\`).
+
+### WebSocket Message Format
+\`\`\`json
+{
+  "payment_id": "uuid",
+  "status": "confirming",
+  "confirmations": 3,
+  "required_confirmations": 5,
+  "amount_usd": "25.00",
+  "amount_crypto": "25.123456",
+  "token": "USDC",
+  "chain": "polygon",
+  "tx_hash": "0x...",
+  "deposit_address": "0x..."
+}
+\`\`\``
+		},
+		{
+			id: 'errors',
+			title: 'Error Handling',
+			content: `
+All errors return a JSON response with a \`detail\` field:
+
+\`\`\`json
+{
+  "detail": "Invalid API key"
+}
+\`\`\`
+
+### HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 201 | Created |
+| 400 | Bad request (validation error) |
+| 401 | Unauthorized (invalid/missing API key) |
+| 404 | Resource not found |
+| 429 | Rate limit exceeded |
+| 500 | Internal server error |
+
+### SDK Error Handling
+
+\`\`\`javascript
+try {
+  const payment = await pc.payments.create({ ... });
+} catch (error) {
+  if (error.status === 429) {
+    // Rate limited — back off and retry
+  }
+  console.error(error.message);
+}
+\`\`\`
+
+\`\`\`python
+from paychains.exceptions import RateLimitError, ValidationError
+
+try:
+    payment = pc.payments.create(...)
+except RateLimitError:
+    # Back off and retry
+    pass
+except ValidationError as e:
+    print(e.message)
+\`\`\``
 		}
 	];
 
@@ -232,12 +463,34 @@ The WebSocket sends updates whenever the payment status or confirmation count ch
 					>{section.title}</a>
 				{/each}
 			</nav>
+
+			<!-- API Key Input -->
+			<div class="mt-8 pt-6 border-t border-white/[0.06]">
+				<label class="block text-[11px] font-medium text-surface-500 uppercase tracking-wider mb-2">API Key for Try It</label>
+				<input
+					bind:value={testApiKey}
+					type="password"
+					placeholder="pc_test_..."
+					class="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[12px] font-mono placeholder-surface-600 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+				/>
+			</div>
 		</aside>
 
 		<!-- Content -->
 		<main class="flex-1 min-w-0 px-6 md:px-12 py-10">
 			<h1 class="text-2xl font-bold tracking-tight mb-2">API Documentation</h1>
 			<p class="text-[14px] text-surface-400 mb-10">Everything you need to integrate PayChains into your application.</p>
+
+			<!-- Mobile API Key -->
+			<div class="md:hidden mb-8 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+				<label class="block text-[11px] font-medium text-surface-500 uppercase tracking-wider mb-2">API Key for Try It</label>
+				<input
+					bind:value={testApiKey}
+					type="password"
+					placeholder="pc_test_..."
+					class="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[12px] font-mono placeholder-surface-600 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+				/>
+			</div>
 
 			<div class="space-y-16">
 				{#each sections as section}
@@ -278,6 +531,77 @@ The WebSocket sends updates whenever the payment status or confirmation count ch
 								.replace(/^(?!<[huptla])(.+)$/gm, '<p>$1</p>')
 							}
 						</div>
+
+						<!-- Try It Panel -->
+						{#if section.tryEndpoints}
+							<div class="mt-6 rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+								<div class="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-2">
+									<svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9.172 14.828a4 4 0 010-5.656m5.656 0a4 4 0 010 5.656M12 12h.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+									<span class="text-[13px] font-semibold text-brand-300">Try It Live</span>
+								</div>
+								<div class="p-4">
+									<div class="flex flex-wrap gap-2 mb-4">
+										{#each section.tryEndpoints as ep}
+											<button
+												onclick={() => openTryIt(ep.method, ep.endpoint, ep.body)}
+												class="px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-colors
+													{tryItEndpoint === ep.endpoint
+														? 'border-brand-500/40 bg-brand-500/10 text-brand-300'
+														: 'border-white/[0.08] text-surface-400 hover:text-surface-200 hover:bg-white/[0.04]'}"
+											>
+												<span class="font-mono text-[11px] mr-1 {ep.method === 'POST' ? 'text-amber-400' : 'text-emerald-400'}">{ep.method}</span>
+												{ep.label}
+											</button>
+										{/each}
+									</div>
+
+									{#if tryItEndpoint && section.tryEndpoints.some(e => e.endpoint === tryItEndpoint)}
+										<div class="space-y-3">
+											<div class="flex items-center gap-2 text-[12px] font-mono text-surface-400">
+												<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold {tryItMethod === 'POST' ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'}">{tryItMethod}</span>
+												<span>{API_BASE}{tryItEndpoint}</span>
+											</div>
+
+											{#if tryItMethod !== 'GET' && tryItBody}
+												<textarea
+													bind:value={tryItBody}
+													rows="6"
+													class="w-full px-3 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[12px] font-mono text-surface-200 placeholder-surface-600 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all resize-none"
+												></textarea>
+											{/if}
+
+											<button
+												onclick={runTryIt}
+												disabled={!testApiKey || tryItLoading}
+												class="px-4 py-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-40 rounded-lg text-[13px] font-semibold transition-all"
+											>
+												{#if tryItLoading}
+													Running...
+												{:else if !testApiKey}
+													Enter API key first
+												{:else}
+													Send Request
+												{/if}
+											</button>
+
+											{#if tryItResponse}
+												<div class="mt-3">
+													<div class="flex items-center gap-2 mb-1.5">
+														<span class="text-[11px] font-medium text-surface-500">Response</span>
+														<span class="px-1.5 py-0.5 rounded text-[11px] font-mono font-medium
+															{tryItStatus >= 200 && tryItStatus < 300 ? 'bg-emerald-500/10 text-emerald-400' :
+															tryItStatus >= 400 ? 'bg-red-500/10 text-red-400' : 'bg-surface-500/10 text-surface-400'}">
+															{tryItStatus || 'ERR'}
+														</span>
+													</div>
+													<pre class="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[12px] font-mono text-surface-300 overflow-x-auto max-h-80 overflow-y-auto">{tryItResponse}</pre>
+												</div>
+											{/if}
+										</div>
+									{/if}
+								</div>
+							</div>
+						{/if}
 					</section>
 				{/each}
 			</div>

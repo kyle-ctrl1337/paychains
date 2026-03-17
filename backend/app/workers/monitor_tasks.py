@@ -114,7 +114,6 @@ async def _async_poll_payments():
                     if confs >= payment.required_confirmations:
                         payment.status = "completed"
                         payment.completed_at = datetime.now(timezone.utc)
-                        payment.fee_amount_usd = payment.amount_usd * payment.fee_percentage
                         logger.info(f"Payment {payment.id}: completed ({confs} confs)")
                         _fire_webhook(session, payment, "payment.completed")
 
@@ -148,7 +147,6 @@ async def _async_count_confirmations(payment_id: str, tx_hash: str):
             if confs >= payment.required_confirmations:
                 payment.status = "completed"
                 payment.completed_at = datetime.now(timezone.utc)
-                payment.fee_amount_usd = payment.amount_usd * payment.fee_percentage
                 _fire_webhook(session, payment, "payment.completed")
             elif payment.status == "pending":
                 payment.status = "confirming"

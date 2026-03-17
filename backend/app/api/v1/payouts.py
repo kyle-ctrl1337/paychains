@@ -31,32 +31,20 @@ async def list_payouts(
     return [PayoutResponse.model_validate(p) for p in result.scalars().all()]
 
 
-@router.post("/request", response_model=PayoutResponse, status_code=201)
+@router.post("/request")
 async def request_payout(
-    data: PayoutRequest,
     merchant: Merchant = Depends(get_current_merchant),
-    db: AsyncSession = Depends(get_db),
 ):
-    # Validate chain has a settlement address
-    settlement = merchant.settlement_address or {}
-    if data.chain not in settlement:
-        raise HTTPException(
-            status_code=400,
-            detail=f"No settlement address configured for chain '{data.chain}'. Update your merchant settings.",
-        )
+    """Payouts are not needed in non-custodial mode.
 
-    payout = Payout(
-        merchant_id=merchant.id,
-        amount=Decimal(str(data.amount)),
-        token=data.token,
-        chain=data.chain,
-        to_address=data.to_address,
+    PayChains never holds your funds — payments are deposited directly
+    to addresses derived from your wallet's xpub key.
+    """
+    raise HTTPException(
+        status_code=400,
+        detail=(
+            "Payouts are not needed with PayChains. "
+            "Funds are deposited directly to your wallet addresses "
+            "derived from your xpub key. No withdrawal required."
+        ),
     )
-    db.add(payout)
-    await db.flush()
-    await db.refresh(payout)
-
-    # In production, dispatch to Celery for processing
-    # process_payout.delay(str(payout.id))
-
-    return PayoutResponse.model_validate(payout)

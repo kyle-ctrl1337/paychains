@@ -1,10 +1,12 @@
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 
 from app.config import get_settings
 
 settings = get_settings()
 
+# Async engine (FastAPI)
 engine = create_async_engine(
     settings.database_url,
     echo=settings.environment == "development",
@@ -13,6 +15,16 @@ engine = create_async_engine(
 )
 
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+# Sync engine (Celery tasks, Alembic)
+sync_engine = create_engine(
+    settings.database_url_sync,
+    echo=settings.environment == "development",
+    pool_size=5,
+    max_overflow=5,
+)
+
+SyncSession = sessionmaker(sync_engine, class_=Session, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):

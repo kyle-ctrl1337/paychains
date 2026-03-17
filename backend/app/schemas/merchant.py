@@ -7,6 +7,7 @@ class MerchantRegister(BaseModel):
     email: EmailStr
     password: str
     company_name: str | None = None
+    xpub_key: str | None = None
 
 
 class MerchantLogin(BaseModel):
@@ -19,6 +20,7 @@ class MerchantUpdate(BaseModel):
     webhook_url: str | None = None
     auto_convert_to: str | None = None
     settlement_address: dict | None = None
+    xpub_key: str | None = None
 
 
 class MerchantResponse(BaseModel):
@@ -28,6 +30,7 @@ class MerchantResponse(BaseModel):
     webhook_url: str | None
     auto_convert_to: str
     settlement_address: dict
+    xpub_key: str | None = None
     plan: str
     is_active: bool
     is_admin: bool = False

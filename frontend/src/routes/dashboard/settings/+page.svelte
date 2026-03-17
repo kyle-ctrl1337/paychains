@@ -238,7 +238,15 @@
 			</div>
 		{/if}
 
+		{#if !apiKeyLive && !apiKeyTest && !newKeys}
+			<div class="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-surface-800/50 border border-white/[0.06] mb-4">
+				<svg class="w-4 h-4 text-surface-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				<span class="text-[12px] text-surface-400">API keys are only shown once at registration. Click <strong>Regenerate keys</strong> to get new ones.</span>
+			</div>
+		{/if}
+
 		<div class="space-y-4">
+			{#if apiKeyLive || newKeys}
 			<div>
 				<label class="flex items-center justify-between text-[12px] font-medium text-surface-400 mb-1.5">
 					Live Key
@@ -261,13 +269,16 @@
 					{showKeys ? apiKeyTest : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}
 				</div>
 			</div>
+			{/if}
 		</div>
 
 		<div class="flex gap-2 mt-4">
+			{#if apiKeyLive || newKeys}
 			<button onclick={() => (showKeys = !showKeys)}
 				class="px-3 py-1.5 text-[12px] font-medium border border-white/[0.08] rounded-lg hover:bg-white/[0.04] transition-colors">
 				{showKeys ? 'Hide keys' : 'Show keys'}
 			</button>
+			{/if}
 			<button onclick={rollKeys} disabled={rolling}
 				class="px-3 py-1.5 text-[12px] font-medium text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500/[0.06] transition-colors">
 				{rolling ? 'Regenerating...' : 'Regenerate keys'}

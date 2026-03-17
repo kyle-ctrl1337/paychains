@@ -30,13 +30,16 @@ const initialState: AuthState = {
 export const auth = writable<AuthState>(initialState);
 
 export function setAuth(token: string, merchant: Merchant, apiKeyLive?: string, apiKeyTest?: string) {
-	const state: AuthState = { token, merchant, apiKeyLive: apiKeyLive || null, apiKeyTest: apiKeyTest || null };
+	// Preserve existing stored keys if no new ones provided
+	const existingLive = apiKeyLive || (browser ? localStorage.getItem('pc_api_key_live') : null);
+	const existingTest = apiKeyTest || (browser ? localStorage.getItem('pc_api_key_test') : null);
+	const state: AuthState = { token, merchant, apiKeyLive: existingLive, apiKeyTest: existingTest };
 	auth.set(state);
 	if (browser) {
 		localStorage.setItem('pc_token', token);
 		localStorage.setItem('pc_merchant', JSON.stringify(merchant));
-		if (apiKeyLive) localStorage.setItem('pc_api_key_live', apiKeyLive);
-		if (apiKeyTest) localStorage.setItem('pc_api_key_test', apiKeyTest);
+		if (existingLive) localStorage.setItem('pc_api_key_live', existingLive);
+		if (existingTest) localStorage.setItem('pc_api_key_test', existingTest);
 	}
 }
 

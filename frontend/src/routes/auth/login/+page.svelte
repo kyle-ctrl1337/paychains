@@ -38,7 +38,7 @@
 				<span class="text-lg font-semibold">PayChains</span>
 			</div>
 			<h2 class="text-2xl font-bold tracking-tight mb-3">The payment infrastructure for crypto-native businesses</h2>
-			<p class="text-surface-400 text-[14px] leading-relaxed">Accept payments on 7 chains, manage subscriptions, and auto-convert to stablecoins — all through a single API.</p>
+			<p class="text-surface-400 text-[14px] leading-relaxed">Accept payments on 5 EVM chains, manage subscriptions, and track everything — all through a single API.</p>
 		</div>
 	</div>
 

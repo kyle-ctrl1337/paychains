@@ -175,7 +175,7 @@
 					<h2 class="text-lg font-semibold text-white">{checkoutData.title}</h2>
 					<p class="text-3xl font-bold text-white mt-2">{formatUSD(checkoutData.amount_usd)}</p>
 					<p class="text-sm text-surface-400 mt-1">
-						{paymentResult.amount_crypto} {paymentResult.token}
+						{parseFloat(paymentResult.amount_crypto).toFixed(2)} {paymentResult.token}
 						<span class="text-surface-500">on</span>
 						<span class="capitalize">{paymentResult.chain}</span>
 					</p>

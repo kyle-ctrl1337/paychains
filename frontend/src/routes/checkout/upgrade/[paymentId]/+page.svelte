@@ -18,6 +18,12 @@
 	let pollInterval: ReturnType<typeof setInterval>;
 	let countdownInterval: ReturnType<typeof setInterval>;
 
+	function formatCrypto(amount: string | number, token: string): string {
+		const num = parseFloat(String(amount));
+		if (['USDC', 'USDT', 'DAI'].includes(token)) return num.toFixed(2);
+		return num.toFixed(6);
+	}
+
 	onMount(() => {
 		const unsub = page.subscribe((p) => {
 			paymentId = p.params.paymentId;
@@ -162,7 +168,7 @@
 					</h2>
 					<p class="text-3xl font-bold text-white mt-2">${payment.amount_usd}</p>
 					<p class="text-sm text-surface-400 mt-1">
-						{parseFloat(payment.amount_crypto).toFixed(2)} {payment.token}
+						{formatCrypto(payment.amount_crypto, payment.token)} {payment.token}
 						<span class="text-surface-500">on</span>
 						<span class="capitalize">{payment.chain}</span>
 					</p>

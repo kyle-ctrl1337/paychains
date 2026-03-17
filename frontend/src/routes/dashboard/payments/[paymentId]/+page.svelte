@@ -82,6 +82,12 @@
 		countdownInterval = setInterval(updateTimer, 1000);
 	}
 
+	function formatCrypto(amount: string | number, token: string): string {
+		const num = parseFloat(String(amount));
+		if (['USDC', 'USDT', 'DAI'].includes(token)) return num.toFixed(2);
+		return num.toFixed(6);
+	}
+
 	async function copyAddress() {
 		if (!payment?.deposit_address) return;
 		try {
@@ -131,7 +137,7 @@
 			<div class="px-8 pt-8 pb-6 text-center border-b border-white/[0.06]">
 				<p class="text-3xl font-bold text-white">${payment.amount_usd}</p>
 				<p class="text-sm text-surface-400 mt-1">
-					{parseFloat(payment.amount_crypto).toFixed(2)} {payment.token}
+					{formatCrypto(payment.amount_crypto, payment.token)} {payment.token}
 					<span class="text-surface-500">on</span>
 					<span class="capitalize">{payment.chain}</span>
 				</p>

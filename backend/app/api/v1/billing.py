@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
+from app.constants import VALID_TOKENS_PER_CHAIN
 from app.database import get_db
 from app.dependencies import get_current_merchant_jwt
 from app.models.merchant import Merchant
@@ -35,7 +36,16 @@ async def create_upgrade_payment(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a crypto payment to upgrade the merchant's plan."""
+    chain = chain.lower()
+    token = token.upper()
     plan = plan.lower()
+
+    # Validate chain/token combo
+    if chain not in VALID_TOKENS_PER_CHAIN:
+        raise HTTPException(status_code=400, detail=f"Unsupported chain: {chain}. Supported: {list(VALID_TOKENS_PER_CHAIN.keys())}")
+    valid_tokens = VALID_TOKENS_PER_CHAIN[chain]
+    if token not in valid_tokens:
+        raise HTTPException(status_code=400, detail=f"Token {token} not available on {chain}. Available: {valid_tokens}")
 
     if plan not in PLAN_CONFIG:
         raise HTTPException(status_code=400, detail=f"Invalid plan: {plan}. Choose from: {', '.join(PLAN_CONFIG.keys())}")

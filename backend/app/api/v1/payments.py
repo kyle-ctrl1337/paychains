@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.constants import VALID_TOKENS_PER_CHAIN
 from app.database import get_db
 from app.dependencies import get_current_merchant
 from app.models.merchant import Merchant
@@ -22,13 +23,23 @@ async def create_payment(
     merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
+    chain = data.chain.lower()
+    token = data.token.upper()
+
+    # Validate chain/token combo
+    if chain not in VALID_TOKENS_PER_CHAIN:
+        raise HTTPException(status_code=400, detail=f"Unsupported chain: {chain}. Supported: {list(VALID_TOKENS_PER_CHAIN.keys())}")
+    valid_tokens = VALID_TOKENS_PER_CHAIN[chain]
+    if token not in valid_tokens:
+        raise HTTPException(status_code=400, detail=f"Token {token} not available on {chain}. Available: {valid_tokens}")
+
     try:
         payment = await create_payment_session(
             db=db,
             merchant=merchant,
             amount_usd=data.amount_usd,
-            token=data.token,
-            chain=data.chain,
+            token=token,
+            chain=chain,
             payment_link_id=data.payment_link_id,
             metadata=data.metadata,
         )

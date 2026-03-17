@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     from_email: str = "payments@paychains.dev"
 
+    # Admin
+    admin_email: str = "kakvjgufdj@gmail.com"
+
     # App
     app_url: str = "http://localhost:5173"
     api_url: str = "http://localhost:8000"

@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
                 pass  # Column already exists or not supported
 
     # Ensure admin account exists
-    ADMIN_EMAILS = ["kakvjgufdj@gmail.com"]
+    ADMIN_EMAILS = [settings.admin_email]
     async with async_session() as session:
         for email in ADMIN_EMAILS:
             result = await session.execute(
@@ -81,9 +81,14 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS
+origins = [settings.app_url]
+if settings.environment != "production":
+    origins.append("http://localhost:5173")
+    origins.append("http://localhost:4173")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.app_url, "http://localhost:5173", "*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -149,7 +149,8 @@ async def test_create_payment_coming_soon_chain(client: AsyncClient):
         json={"amount_usd": 10, "chain": "solana", "token": "SOL"},
     )
     assert res.status_code == 400
-    assert "coming soon" in res.json()["detail"].lower()
+    # Chain/token validation rejects before coming-soon check
+    assert "unsupported chain" in res.json()["detail"].lower() or "coming soon" in res.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
@@ -301,7 +302,8 @@ async def test_checkout_coming_soon_chain(client: AsyncClient):
         json={"chain": "bitcoin", "token": "BTC"},
     )
     assert res.status_code == 400
-    assert "coming soon" in res.json()["detail"].lower()
+    # Chain/token validation rejects before coming-soon check
+    assert "unsupported chain" in res.json()["detail"].lower() or "coming soon" in res.json()["detail"].lower()
 
 
 # ─── Health ──────────────────────────────────────────────────────
@@ -317,18 +319,15 @@ async def test_health_returns_version(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_create_payment_without_xpub(client: AsyncClient):
-    """Payment creation works without xpub (returns deterministic placeholder address)."""
+    """Payment creation without wallet configured should fail with 400."""
     api_key, _ = await register_and_get_keys(client, "noxpub@test.com")
     res = await client.post(
         "/api/v1/payments/create",
         headers={"X-API-Key": api_key},
         json={"amount_usd": 10, "chain": "polygon", "token": "USDC"},
     )
-    assert res.status_code == 201
-    data = res.json()
-    assert data["deposit_address"].startswith("0x")
-    assert float(data["fee_percentage"]) == 0
-    assert float(data["fee_amount_usd"]) == 0
+    assert res.status_code == 400
+    assert "wallet not configured" in res.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
@@ -359,7 +358,13 @@ async def test_create_payment_with_xpub(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_zero_fees_on_payment(client: AsyncClient):
     """All payments should have zero fees (pure SaaS model)."""
-    api_key, _ = await register_and_get_keys(client, "zerofee@test.com")
+    api_key, token = await register_and_get_keys(client, "zerofee@test.com")
+    # Must set wallet address first
+    await client.patch(
+        "/api/v1/merchant/me",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"xpub_key": "0xE911c873b881D2d8a4540a710AbE9BE04597B7d4"},
+    )
     res = await client.post(
         "/api/v1/payments/create",
         headers={"X-API-Key": api_key},

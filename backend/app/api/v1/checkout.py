@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.constants import VALID_TOKENS_PER_CHAIN
 from app.database import get_db
 from app.models.merchant import Merchant
 from app.models.payment import Payment
@@ -66,6 +67,13 @@ async def initiate_checkout(
     chain = data.chain.lower()
     token = data.token.upper()
 
+    # Validate chain/token combo
+    if chain not in VALID_TOKENS_PER_CHAIN:
+        raise HTTPException(status_code=400, detail=f"Unsupported chain: {chain}. Supported: {list(VALID_TOKENS_PER_CHAIN.keys())}")
+    valid_tokens = VALID_TOKENS_PER_CHAIN[chain]
+    if token not in valid_tokens:
+        raise HTTPException(status_code=400, detail=f"Token {token} not available on {chain}. Available: {valid_tokens}")
+
     if chain in COMING_SOON_CHAINS:
         raise HTTPException(status_code=400, detail=f"{chain.capitalize()} support is coming soon")
     if chain not in link.accepted_chains:
@@ -81,14 +89,17 @@ async def initiate_checkout(
     )
     merchant = merchant_result.scalar_one()
 
-    payment = await create_payment_session(
-        db=db,
-        merchant=merchant,
-        amount_usd=link.amount_usd,
-        token=token,
-        chain=chain,
-        payment_link_id=link.id,
-    )
+    try:
+        payment = await create_payment_session(
+            db=db,
+            merchant=merchant,
+            amount_usd=link.amount_usd,
+            token=token,
+            chain=chain,
+            payment_link_id=link.id,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     qr_data = f"{chain}:{payment.deposit_address}?amount={payment.amount_crypto}&token={token}"
     qr_code = generate_qr_code_base64(qr_data)

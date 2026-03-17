@@ -138,8 +138,7 @@ class EVMProvider(ChainProvider):
         if not contract_addr:
             return []
 
-        addr = AsyncWeb3.to_checksum_address(address)
-        padded = "0x" + addr[2:].lower().zfill(64)
+        padded = "0x" + address[2:].lower().zfill(64)
 
         try:
             logs = await w3.eth.get_logs({

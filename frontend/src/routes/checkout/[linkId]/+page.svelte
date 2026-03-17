@@ -22,6 +22,12 @@
 	let copied = $state(false);
 	let qrDataUrl = $state('');
 
+	function formatCrypto(amount: string | number, token: string): string {
+		const num = parseFloat(String(amount));
+		if (['USDC', 'USDT', 'DAI'].includes(token)) return num.toFixed(2);
+		return num.toFixed(6);
+	}
+
 	const comingSoonChains = ['solana', 'bitcoin'];
 
 	const chainMeta: Record<string, { symbol: string; name: string; color: string }> = {
@@ -180,7 +186,7 @@
 					<h2 class="text-lg font-semibold text-white">{checkoutData.title}</h2>
 					<p class="text-3xl font-bold text-white mt-2">{formatUSD(checkoutData.amount_usd)}</p>
 					<p class="text-sm text-surface-400 mt-1">
-						{parseFloat(paymentResult.amount_crypto).toFixed(2)} {paymentResult.token}
+						{formatCrypto(paymentResult.amount_crypto, paymentResult.token)} {paymentResult.token}
 						<span class="text-surface-500">on</span>
 						<span class="capitalize">{paymentResult.chain}</span>
 					</p>

@@ -90,22 +90,20 @@ async def create_payment_session(
     # Convert USD to crypto amount
     amount_crypto = await usd_to_crypto(amount_usd, token)
 
+    # Round to appropriate decimal places
+    DISPLAY_DECIMALS = {"USDC": 2, "USDT": 2, "DAI": 2, "ETH": 6, "MATIC": 4, "BNB": 6}
+    decimals = DISPLAY_DECIMALS.get(token, 8)
+    amount_crypto = round(amount_crypto, decimals)
+
     # Derive deposit address from merchant's xpub (non-custodial)
     payment_idx = await get_next_payment_index(db, merchant.id)
 
     if merchant.xpub_key:
         address = derive_address_from_xpub(merchant.xpub_key, payment_idx, chain)
     else:
-        # Fallback: deterministic placeholder for testing
-        import hashlib
-        hash_input = f"{merchant.id}:{payment_idx}:{chain}"
-        addr_hash = hashlib.sha256(hash_input.encode()).hexdigest()
-        if chain in ("ethereum", "polygon", "bsc", "arbitrum", "base"):
-            address = f"0x{addr_hash[:40]}"
-        elif chain == "bitcoin":
-            address = f"bc1q{addr_hash[:38]}"
-        else:
-            address = f"0x{addr_hash[:40]}"
+        raise ValueError(
+            "Wallet not configured. Please add your wallet address in Settings before accepting payments."
+        )
 
     payment = Payment(
         merchant_id=merchant.id,

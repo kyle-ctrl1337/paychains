@@ -56,4 +56,4 @@ cryptography==44.0.0
 python-dateutil==2.9.0
 
 # Email
-resend==2.5.0
+resend==2.5.1

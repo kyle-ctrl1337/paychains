@@ -9,7 +9,8 @@ from sqlalchemy import select
 
 from app.api.router import api_router
 from app.config import get_settings
-from app.database import async_session
+from app.database import async_session, engine, Base
+import app.models  # noqa: F401 — ensure all models are registered
 from app.models.payment import Payment
 
 settings = get_settings()
@@ -17,6 +18,9 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create all tables on startup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
 
 

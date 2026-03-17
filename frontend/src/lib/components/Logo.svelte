@@ -5,9 +5,8 @@
 <span class="inline-flex items-center gap-2.5">
 	<span
 		class="relative flex items-center justify-center rounded-xl"
-		style="width: {size}px; height: {size}px; background: linear-gradient(135deg, #10b981, #059669);"
+		style="width: {size}px; height: {size}px; background: linear-gradient(135deg, #7c6aff, #6347ff);"
 	>
-		<!-- Chain links forming a "P" shape -->
 		<svg
 			width={size * 0.6}
 			height={size * 0.6}
@@ -36,12 +35,11 @@
 			<!-- Small chain break detail -->
 			<circle cx="17" cy="8.5" r="1" fill="white" opacity="0.6" />
 		</svg>
-		<!-- Subtle glow -->
-		<span class="absolute inset-0 rounded-xl" style="box-shadow: 0 0 {size * 0.5}px rgba(16, 185, 129, 0.3);"></span>
+		<span class="absolute inset-0 rounded-xl" style="box-shadow: 0 0 {size * 0.5}px rgba(99, 71, 255, 0.3);"></span>
 	</span>
 	{#if showText}
 		<span class="font-semibold tracking-[-0.02em] {textClass}">
-			Pay<span class="text-emerald-400">Chains</span>
+			Pay<span class="text-brand-400">Chains</span>
 		</span>
 	{/if}
 </span>

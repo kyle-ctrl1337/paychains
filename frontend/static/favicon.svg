@@ -1,5 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#6347FF"/>
-  <path d="M10 16.5L14.5 21L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M8 8h4M20 8h4M8 24h4M20 24h4" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7c6aff"/>
+      <stop offset="100%" stop-color="#6347ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#bg)"/>
+  <!-- P with chain-link bowl -->
+  <path d="M10 6V26" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <rect x="10" y="6" width="12" height="10.5" rx="5.25" stroke="white" stroke-width="3" fill="none"/>
+  <circle cx="21.5" cy="11.25" r="1.2" fill="white" opacity="0.5"/>
 </svg>

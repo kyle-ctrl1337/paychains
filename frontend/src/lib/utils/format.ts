@@ -22,17 +22,18 @@ export function shortenAddress(address: string, chars = 6): string {
 
 export function statusColor(status: string): string {
 	const colors: Record<string, string> = {
-		pending: 'bg-yellow-100 text-yellow-800',
-		confirming: 'bg-blue-100 text-blue-800',
-		completed: 'bg-green-100 text-green-800',
-		failed: 'bg-red-100 text-red-800',
-		expired: 'bg-gray-100 text-gray-800',
-		refunded: 'bg-purple-100 text-purple-800',
-		active: 'bg-green-100 text-green-800',
-		paused: 'bg-yellow-100 text-yellow-800',
-		cancelled: 'bg-red-100 text-red-800',
-		past_due: 'bg-orange-100 text-orange-800',
-		delivered: 'bg-green-100 text-green-800'
+		pending: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+		confirming: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+		completed: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+		failed: 'bg-red-500/10 text-red-400 border border-red-500/20',
+		expired: 'bg-surface-500/10 text-surface-400 border border-surface-500/20',
+		refunded: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
+		active: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+		paused: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+		cancelled: 'bg-red-500/10 text-red-400 border border-red-500/20',
+		past_due: 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
+		delivered: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+		processing: 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
 	};
-	return colors[status] || 'bg-gray-100 text-gray-800';
+	return colors[status] || 'bg-surface-500/10 text-surface-400 border border-surface-500/20';
 }

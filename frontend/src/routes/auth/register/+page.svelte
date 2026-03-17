@@ -9,6 +9,7 @@
 	let error = $state('');
 	let loading = $state(false);
 	let apiKeys = $state<{ live: string; test: string } | null>(null);
+	let copied = $state('');
 
 	async function handleRegister() {
 		error = '';
@@ -19,11 +20,7 @@
 				password,
 				company_name: companyName || undefined
 			});
-
-			// Store the API keys to show them once
 			apiKeys = { live: result.api_key_live, test: result.api_key_test };
-
-			// Login to get JWT
 			const loginResult = await api.login({ email, password });
 			setAuth(loginResult.access_token, loginResult.merchant, result.api_key_live, result.api_key_test);
 		} catch (e: any) {
@@ -33,111 +30,186 @@
 		}
 	}
 
+	function copyKey(key: string, type: string) {
+		navigator.clipboard.writeText(key);
+		copied = type;
+		setTimeout(() => copied = '', 2000);
+	}
+
 	function goToDashboard() {
 		goto('/dashboard');
 	}
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
-	<div class="w-full max-w-md">
-		<div class="text-center mb-8">
-			<a href="/" class="text-2xl font-bold">
-				<span class="text-purple-600">Pay</span>Chains
-			</a>
-			<p class="text-gray-500 mt-2">Create your merchant account</p>
-		</div>
-
-		{#if apiKeys}
-			<!-- Show API Keys (one time only) -->
-			<div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8 space-y-6">
-				<div class="text-center">
-					<div class="text-4xl mb-3">&#127881;</div>
-					<h2 class="text-xl font-bold">Account Created!</h2>
-					<p class="text-sm text-gray-500 mt-1">Save your API keys — they won't be shown again.</p>
+<div class="min-h-screen flex bg-surface-950">
+	<!-- Left panel -->
+	<div class="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
+		<div class="grid-bg absolute inset-0"></div>
+		<div class="hero-glow bg-brand-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+		<div class="relative z-10 max-w-md px-12">
+			<div class="flex items-center gap-2.5 mb-8">
+				<div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="4 12 9 17 20 6" />
+					</svg>
 				</div>
-
-				<div class="space-y-4">
-					<div>
-						<label class="block text-xs font-medium text-gray-500 mb-1">Live API Key</label>
-						<div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-xs break-all select-all">
-							{apiKeys.live}
-						</div>
-					</div>
-					<div>
-						<label class="block text-xs font-medium text-gray-500 mb-1">Test API Key</label>
-						<div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-xs break-all select-all">
-							{apiKeys.test}
-						</div>
-					</div>
-				</div>
-
-				<button
-					onclick={goToDashboard}
-					class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium transition"
-				>
-					Go to Dashboard
-				</button>
+				<span class="text-lg font-semibold">PayChains</span>
 			</div>
-		{:else}
-			<form
-				onsubmit={(e) => { e.preventDefault(); handleRegister(); }}
-				class="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8 space-y-6"
-			>
-				{#if error}
-					<div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-						{error}
+			<h2 class="text-2xl font-bold tracking-tight mb-3">Start accepting crypto in minutes</h2>
+			<p class="text-surface-400 text-[14px] leading-relaxed mb-8">Get your API keys instantly. No approval process, no credit card required.</p>
+
+			<div class="space-y-4">
+				<div class="flex items-start gap-3">
+					<div class="w-6 h-6 rounded-full bg-brand-500/20 flex items-center justify-center shrink-0 mt-0.5">
+						<span class="text-[11px] font-bold text-brand-400">1</span>
 					</div>
-				{/if}
-
-				<div>
-					<label for="company" class="block text-sm font-medium mb-1.5">Company Name</label>
-					<input
-						id="company"
-						type="text"
-						bind:value={companyName}
-						class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-						placeholder="Acme Inc. (optional)"
-					/>
+					<div>
+						<div class="text-[13px] font-medium">Create account</div>
+						<div class="text-[12px] text-surface-500">Email + password. That's it.</div>
+					</div>
 				</div>
-
-				<div>
-					<label for="email" class="block text-sm font-medium mb-1.5">Email</label>
-					<input
-						id="email"
-						type="email"
-						bind:value={email}
-						required
-						class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-						placeholder="you@company.com"
-					/>
+				<div class="flex items-start gap-3">
+					<div class="w-6 h-6 rounded-full bg-brand-500/20 flex items-center justify-center shrink-0 mt-0.5">
+						<span class="text-[11px] font-bold text-brand-400">2</span>
+					</div>
+					<div>
+						<div class="text-[13px] font-medium">Get API keys</div>
+						<div class="text-[12px] text-surface-500">Live and test keys generated instantly.</div>
+					</div>
 				</div>
-
-				<div>
-					<label for="password" class="block text-sm font-medium mb-1.5">Password</label>
-					<input
-						id="password"
-						type="password"
-						bind:value={password}
-						required
-						minlength="8"
-						class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-						placeholder="Min 8 characters"
-					/>
+				<div class="flex items-start gap-3">
+					<div class="w-6 h-6 rounded-full bg-brand-500/20 flex items-center justify-center shrink-0 mt-0.5">
+						<span class="text-[11px] font-bold text-brand-400">3</span>
+					</div>
+					<div>
+						<div class="text-[13px] font-medium">Accept payments</div>
+						<div class="text-[12px] text-surface-500">On 7 blockchains, from day one.</div>
+					</div>
 				</div>
+			</div>
+		</div>
+	</div>
 
-				<button
-					type="submit"
-					disabled={loading}
-					class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-400 text-white rounded-lg font-medium transition"
-				>
-					{loading ? 'Creating account...' : 'Create Account'}
-				</button>
+	<!-- Right panel -->
+	<div class="flex-1 flex items-center justify-center px-6 py-12">
+		<div class="w-full max-w-sm">
+			<a href="/" class="lg:hidden flex items-center gap-2 mb-10">
+				<div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="4 12 9 17 20 6" />
+					</svg>
+				</div>
+				<span class="text-[15px] font-semibold">PayChains</span>
+			</a>
 
-				<p class="text-center text-sm text-gray-500">
+			{#if apiKeys}
+				<!-- API Keys display -->
+				<div class="animate-fade-up">
+					<div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5">
+						<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</div>
+					<h1 class="text-xl font-bold tracking-tight mb-1">Account created</h1>
+					<p class="text-[13px] text-surface-400 mb-6">Save your API keys now — they won't be shown again.</p>
+
+					<div class="space-y-4">
+						<div>
+							<label class="flex items-center justify-between text-[12px] font-medium text-surface-400 mb-1.5">
+								Live Key
+								<button onclick={() => copyKey(apiKeys!.live, 'live')} class="text-brand-400 hover:text-brand-300 transition-colors">
+									{copied === 'live' ? 'Copied!' : 'Copy'}
+								</button>
+							</label>
+							<div class="px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] font-mono text-[12px] text-surface-300 break-all select-all">
+								{apiKeys.live}
+							</div>
+						</div>
+						<div>
+							<label class="flex items-center justify-between text-[12px] font-medium text-surface-400 mb-1.5">
+								Test Key
+								<button onclick={() => copyKey(apiKeys!.test, 'test')} class="text-brand-400 hover:text-brand-300 transition-colors">
+									{copied === 'test' ? 'Copied!' : 'Copy'}
+								</button>
+							</label>
+							<div class="px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] font-mono text-[12px] text-surface-300 break-all select-all">
+								{apiKeys.test}
+							</div>
+						</div>
+					</div>
+
+					<div class="flex items-center gap-2 mt-4 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+						<svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+						<span class="text-[12px] text-amber-300">These keys are shown only once. Store them securely.</span>
+					</div>
+
+					<button
+						onclick={goToDashboard}
+						class="w-full mt-6 py-2.5 bg-brand-500 hover:bg-brand-400 rounded-lg text-[14px] font-semibold transition-all hover:shadow-lg hover:shadow-brand-500/20"
+					>
+						Go to Dashboard
+					</button>
+				</div>
+			{:else}
+				<h1 class="text-xl font-bold tracking-tight mb-1">Create your account</h1>
+				<p class="text-[13px] text-surface-400 mb-8">Get your API keys in 30 seconds</p>
+
+				<form onsubmit={(e) => { e.preventDefault(); handleRegister(); }} class="space-y-5">
+					{#if error}
+						<div class="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
+							<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+							{error}
+						</div>
+					{/if}
+
+					<div>
+						<label for="company" class="block text-[13px] font-medium text-surface-300 mb-1.5">Company name</label>
+						<input
+							id="company"
+							type="text"
+							bind:value={companyName}
+							class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+							placeholder="Acme Inc. (optional)"
+						/>
+					</div>
+
+					<div>
+						<label for="email" class="block text-[13px] font-medium text-surface-300 mb-1.5">Email</label>
+						<input
+							id="email"
+							type="email"
+							bind:value={email}
+							required
+							class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+							placeholder="you@company.com"
+						/>
+					</div>
+
+					<div>
+						<label for="password" class="block text-[13px] font-medium text-surface-300 mb-1.5">Password</label>
+						<input
+							id="password"
+							type="password"
+							bind:value={password}
+							required
+							minlength="8"
+							class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+							placeholder="Min 8 characters"
+						/>
+					</div>
+
+					<button
+						type="submit"
+						disabled={loading}
+						class="w-full py-2.5 bg-brand-500 hover:bg-brand-400 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-[14px] font-semibold transition-all hover:shadow-lg hover:shadow-brand-500/20"
+					>
+						{loading ? 'Creating account...' : 'Create account'}
+					</button>
+				</form>
+
+				<p class="text-center text-[13px] text-surface-500 mt-6">
 					Already have an account?
-					<a href="/auth/login" class="text-purple-600 hover:text-purple-500 font-medium">Sign in</a>
+					<a href="/auth/login" class="text-brand-400 hover:text-brand-300 font-medium transition-colors">Sign in</a>
 				</p>
-			</form>
-		{/if}
+			{/if}
+		</div>
 	</div>
 </div>

@@ -1,1 +1,110 @@
 @import 'tailwindcss';
+
+@theme {
+	--font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+	--font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+	--color-brand-50: #f0f0ff;
+	--color-brand-100: #e0e0ff;
+	--color-brand-200: #c7c7ff;
+	--color-brand-300: #a3a3ff;
+	--color-brand-400: #7c6aff;
+	--color-brand-500: #6347ff;
+	--color-brand-600: #5530f7;
+	--color-brand-700: #4922e3;
+	--color-brand-800: #3c1cbf;
+	--color-brand-900: #331a9c;
+	--color-brand-950: #1e0e6a;
+	--color-surface-0: #ffffff;
+	--color-surface-50: #f8f9fb;
+	--color-surface-100: #f1f3f5;
+	--color-surface-200: #e5e7eb;
+	--color-surface-300: #d1d5db;
+	--color-surface-400: #9ca3af;
+	--color-surface-500: #6b7280;
+	--color-surface-600: #4b5563;
+	--color-surface-700: #374151;
+	--color-surface-800: #1f2937;
+	--color-surface-850: #18202f;
+	--color-surface-900: #111827;
+	--color-surface-950: #0a0f1a;
+}
+
+html {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+::selection {
+	background-color: rgba(99, 71, 255, 0.2);
+}
+
+/* Subtle glow effect for hero */
+.hero-glow {
+	position: absolute;
+	width: 600px;
+	height: 600px;
+	border-radius: 50%;
+	filter: blur(120px);
+	opacity: 0.15;
+	pointer-events: none;
+}
+
+/* Grid pattern background */
+.grid-bg {
+	background-image:
+		linear-gradient(rgba(99, 71, 255, 0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(99, 71, 255, 0.03) 1px, transparent 1px);
+	background-size: 60px 60px;
+}
+
+/* Fade in animation */
+@keyframes fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-fade-up {
+	animation: fade-up 0.6s ease-out forwards;
+}
+
+.animate-fade-up-delay-1 {
+	animation: fade-up 0.6s ease-out 0.1s forwards;
+	opacity: 0;
+}
+
+.animate-fade-up-delay-2 {
+	animation: fade-up 0.6s ease-out 0.2s forwards;
+	opacity: 0;
+}
+
+.animate-fade-up-delay-3 {
+	animation: fade-up 0.6s ease-out 0.3s forwards;
+	opacity: 0;
+}
+
+.animate-fade-up-delay-4 {
+	animation: fade-up 0.6s ease-out 0.4s forwards;
+	opacity: 0;
+}
+
+/* Code syntax highlight */
+.token-keyword { color: #c792ea; }
+.token-function { color: #82aaff; }
+.token-string { color: #c3e88d; }
+.token-number { color: #f78c6c; }
+.token-comment { color: #546e7a; }
+.token-property { color: #ffcb6b; }
+.token-punctuation { color: #89ddff; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(99, 71, 255, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99, 71, 255, 0.4); }

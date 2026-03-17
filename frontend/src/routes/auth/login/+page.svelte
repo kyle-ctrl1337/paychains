@@ -23,61 +23,85 @@
 	}
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
-	<div class="w-full max-w-md">
-		<div class="text-center mb-8">
-			<a href="/" class="text-2xl font-bold">
-				<span class="text-purple-600">Pay</span>Chains
-			</a>
-			<p class="text-gray-500 mt-2">Sign in to your merchant dashboard</p>
-		</div>
-
-		<form
-			onsubmit={(e) => { e.preventDefault(); handleLogin(); }}
-			class="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8 space-y-6"
-		>
-			{#if error}
-				<div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-					{error}
+<div class="min-h-screen flex bg-surface-950">
+	<!-- Left panel -->
+	<div class="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
+		<div class="grid-bg absolute inset-0"></div>
+		<div class="hero-glow bg-brand-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+		<div class="relative z-10 max-w-md px-12">
+			<div class="flex items-center gap-2.5 mb-8">
+				<div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="4 12 9 17 20 6" />
+					</svg>
 				</div>
-			{/if}
-
-			<div>
-				<label for="email" class="block text-sm font-medium mb-1.5">Email</label>
-				<input
-					id="email"
-					type="email"
-					bind:value={email}
-					required
-					class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-					placeholder="you@company.com"
-				/>
+				<span class="text-lg font-semibold">PayChains</span>
 			</div>
+			<h2 class="text-2xl font-bold tracking-tight mb-3">The payment infrastructure for crypto-native businesses</h2>
+			<p class="text-surface-400 text-[14px] leading-relaxed">Accept payments on 7 chains, manage subscriptions, and auto-convert to stablecoins — all through a single API.</p>
+		</div>
+	</div>
 
-			<div>
-				<label for="password" class="block text-sm font-medium mb-1.5">Password</label>
-				<input
-					id="password"
-					type="password"
-					bind:value={password}
-					required
-					class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-					placeholder="••••••••"
-				/>
-			</div>
+	<!-- Right panel -->
+	<div class="flex-1 flex items-center justify-center px-6 py-12">
+		<div class="w-full max-w-sm">
+			<a href="/" class="lg:hidden flex items-center gap-2 mb-10">
+				<div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="4 12 9 17 20 6" />
+					</svg>
+				</div>
+				<span class="text-[15px] font-semibold">PayChains</span>
+			</a>
 
-			<button
-				type="submit"
-				disabled={loading}
-				class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-400 text-white rounded-lg font-medium transition"
-			>
-				{loading ? 'Signing in...' : 'Sign In'}
-			</button>
+			<h1 class="text-xl font-bold tracking-tight mb-1">Welcome back</h1>
+			<p class="text-[13px] text-surface-400 mb-8">Sign in to your merchant dashboard</p>
 
-			<p class="text-center text-sm text-gray-500">
+			<form onsubmit={(e) => { e.preventDefault(); handleLogin(); }} class="space-y-5">
+				{#if error}
+					<div class="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
+						<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+						{error}
+					</div>
+				{/if}
+
+				<div>
+					<label for="email" class="block text-[13px] font-medium text-surface-300 mb-1.5">Email</label>
+					<input
+						id="email"
+						type="email"
+						bind:value={email}
+						required
+						class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+						placeholder="you@company.com"
+					/>
+				</div>
+
+				<div>
+					<label for="password" class="block text-[13px] font-medium text-surface-300 mb-1.5">Password</label>
+					<input
+						id="password"
+						type="password"
+						bind:value={password}
+						required
+						class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+						placeholder="Enter your password"
+					/>
+				</div>
+
+				<button
+					type="submit"
+					disabled={loading}
+					class="w-full py-2.5 bg-brand-500 hover:bg-brand-400 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-[14px] font-semibold transition-all hover:shadow-lg hover:shadow-brand-500/20"
+				>
+					{loading ? 'Signing in...' : 'Sign in'}
+				</button>
+			</form>
+
+			<p class="text-center text-[13px] text-surface-500 mt-6">
 				Don't have an account?
-				<a href="/auth/register" class="text-purple-600 hover:text-purple-500 font-medium">Create one</a>
+				<a href="/auth/register" class="text-brand-400 hover:text-brand-300 font-medium transition-colors">Create one</a>
 			</p>
-		</form>
+		</div>
 	</div>
 </div>

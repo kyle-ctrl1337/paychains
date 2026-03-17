@@ -22,44 +22,49 @@
 </script>
 
 <div>
-	<h1 class="text-2xl font-bold mb-6">Subscriptions</h1>
+	<div class="mb-8">
+		<h1 class="text-xl font-bold tracking-tight">Subscriptions</h1>
+		<p class="text-[13px] text-surface-400 mt-1">Manage recurring billing plans</p>
+	</div>
 
-	<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+	<div class="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
 		{#if loading}
-			<div class="p-8 text-center text-gray-500">Loading subscriptions...</div>
+			<div class="p-12 text-center text-surface-500 text-[13px]">Loading subscriptions...</div>
 		{:else if subscriptions.length === 0}
-			<div class="p-8 text-center text-gray-500">
-				No subscriptions yet. Create your first subscription via the API.
+			<div class="p-12 text-center">
+				<div class="text-[13px] text-surface-500">No subscriptions yet. Create your first subscription via the API.</div>
 			</div>
 		{:else}
-			<table class="w-full">
-				<thead class="bg-gray-50 dark:bg-gray-800/50 text-xs text-gray-500 uppercase">
-					<tr>
-						<th class="px-6 py-3 text-left">Plan</th>
-						<th class="px-6 py-3 text-left">Customer</th>
-						<th class="px-6 py-3 text-left">Amount</th>
-						<th class="px-6 py-3 text-left">Interval</th>
-						<th class="px-6 py-3 text-left">Status</th>
-						<th class="px-6 py-3 text-left">Next Payment</th>
-					</tr>
-				</thead>
-				<tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-					{#each subscriptions as sub}
-						<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
-							<td class="px-6 py-4 text-sm font-medium">{sub.plan_name}</td>
-							<td class="px-6 py-4 text-sm text-gray-500">{sub.customer_email || sub.customer_wallet || '—'}</td>
-							<td class="px-6 py-4 text-sm">{formatUSD(sub.amount_usd)}</td>
-							<td class="px-6 py-4 text-sm capitalize">{sub.interval}</td>
-							<td class="px-6 py-4">
-								<span class="px-2 py-1 rounded-full text-xs font-medium {statusColor(sub.status)}">
-									{sub.status}
-								</span>
-							</td>
-							<td class="px-6 py-4 text-sm text-gray-500">{formatDate(sub.next_payment_at)}</td>
+			<div class="overflow-x-auto">
+				<table class="w-full">
+					<thead>
+						<tr class="border-b border-white/[0.06]">
+							<th class="px-5 py-3 text-left text-[11px] font-medium text-surface-500 uppercase tracking-wider">Plan</th>
+							<th class="px-5 py-3 text-left text-[11px] font-medium text-surface-500 uppercase tracking-wider">Customer</th>
+							<th class="px-5 py-3 text-left text-[11px] font-medium text-surface-500 uppercase tracking-wider">Amount</th>
+							<th class="px-5 py-3 text-left text-[11px] font-medium text-surface-500 uppercase tracking-wider">Interval</th>
+							<th class="px-5 py-3 text-left text-[11px] font-medium text-surface-500 uppercase tracking-wider">Status</th>
+							<th class="px-5 py-3 text-left text-[11px] font-medium text-surface-500 uppercase tracking-wider">Next Payment</th>
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+					</thead>
+					<tbody class="divide-y divide-white/[0.04]">
+						{#each subscriptions as sub}
+							<tr class="hover:bg-white/[0.02] transition-colors">
+								<td class="px-5 py-3.5 text-[13px] font-medium">{sub.plan_name}</td>
+								<td class="px-5 py-3.5 text-[13px] text-surface-400">{sub.customer_email || sub.customer_wallet || '—'}</td>
+								<td class="px-5 py-3.5 text-[13px] tabular-nums">{formatUSD(sub.amount_usd)}</td>
+								<td class="px-5 py-3.5 text-[13px] text-surface-300 capitalize">{sub.interval}</td>
+								<td class="px-5 py-3.5">
+									<span class="px-2 py-0.5 rounded-md text-[11px] font-medium {statusColor(sub.status)}">
+										{sub.status}
+									</span>
+								</td>
+								<td class="px-5 py-3.5 text-[12px] text-surface-500">{formatDate(sub.next_payment_at)}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		{/if}
 	</div>
 </div>

@@ -7,13 +7,12 @@
 	let links = $state<any[]>([]);
 	let loading = $state(true);
 	let showCreate = $state(false);
-
-	// Create form
 	let title = $state('');
 	let description = $state('');
 	let amountUsd = $state('');
 	let creating = $state(false);
 	let apiKey = $state('');
+	let copiedId = $state('');
 
 	onMount(() => {
 		auth.subscribe(async (state) => {
@@ -55,73 +54,86 @@
 	function copyLink(id: string) {
 		const url = `${window.location.origin}/checkout/${id}`;
 		navigator.clipboard.writeText(url);
+		copiedId = id;
+		setTimeout(() => copiedId = '', 2000);
 	}
 </script>
 
 <div>
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">Payment Links</h1>
+	<div class="flex items-center justify-between mb-8">
+		<div>
+			<h1 class="text-xl font-bold tracking-tight">Payment Links</h1>
+			<p class="text-[13px] text-surface-400 mt-1">Shareable checkout pages for your customers</p>
+		</div>
 		<button
 			onclick={() => (showCreate = !showCreate)}
-			class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded-lg transition"
+			class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-500 hover:bg-brand-400 rounded-lg text-[13px] font-semibold transition-all hover:shadow-lg hover:shadow-brand-500/20"
 		>
-			{showCreate ? 'Cancel' : '+ Create Link'}
+			{#if showCreate}
+				Cancel
+			{:else}
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				Create Link
+			{/if}
 		</button>
 	</div>
 
 	{#if showCreate}
-		<form
-			onsubmit={(e) => { e.preventDefault(); createLink(); }}
-			class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-6 space-y-4"
-		>
+		<form onsubmit={(e) => { e.preventDefault(); createLink(); }}
+			class="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 mb-6 space-y-4">
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>
-					<label class="block text-sm font-medium mb-1">Title</label>
+					<label class="block text-[13px] font-medium text-surface-300 mb-1.5">Title</label>
 					<input bind:value={title} required
-						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm" placeholder="Premium Plan" />
+						class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+						placeholder="Premium Plan" />
 				</div>
 				<div>
-					<label class="block text-sm font-medium mb-1">Amount (USD)</label>
+					<label class="block text-[13px] font-medium text-surface-300 mb-1.5">Amount (USD)</label>
 					<input bind:value={amountUsd} type="number" step="0.01"
-						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm" placeholder="49.99 (leave empty for custom)" />
+						class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all"
+						placeholder="49.99 (leave empty for custom)" />
 				</div>
 			</div>
 			<div>
-				<label class="block text-sm font-medium mb-1">Description</label>
+				<label class="block text-[13px] font-medium text-surface-300 mb-1.5">Description</label>
 				<textarea bind:value={description}
-					class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm" rows="2" placeholder="Optional description"></textarea>
+					class="w-full px-3.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[14px] placeholder-surface-500 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 outline-none transition-all resize-none"
+					rows="2" placeholder="Optional description"></textarea>
 			</div>
 			<button type="submit" disabled={creating}
-				class="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-400 text-white text-sm font-medium rounded-lg transition">
+				class="px-4 py-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-50 rounded-lg text-[13px] font-semibold transition-all">
 				{creating ? 'Creating...' : 'Create Payment Link'}
 			</button>
 		</form>
 	{/if}
 
-	<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+	<div class="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
 		{#if loading}
-			<div class="p-8 text-center text-gray-500">Loading...</div>
+			<div class="p-12 text-center text-surface-500 text-[13px]">Loading...</div>
 		{:else if links.length === 0}
-			<div class="p-8 text-center text-gray-500">No payment links yet.</div>
+			<div class="p-12 text-center">
+				<div class="text-[13px] text-surface-500">No payment links yet.</div>
+			</div>
 		{:else}
-			<div class="divide-y divide-gray-200 dark:divide-gray-800">
+			<div class="divide-y divide-white/[0.04]">
 				{#each links as link}
-					<div class="p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
+					<div class="px-5 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
 						<div>
-							<h3 class="font-medium">{link.title}</h3>
-							<p class="text-sm text-gray-500 mt-0.5">
-								{link.amount_usd ? formatUSD(link.amount_usd) : 'Custom amount'} &bull;
-								{link.accepted_chains.length} chains &bull;
-								Created {formatDate(link.created_at)}
+							<h3 class="text-[14px] font-medium">{link.title}</h3>
+							<p class="text-[12px] text-surface-500 mt-0.5">
+								{link.amount_usd ? formatUSD(link.amount_usd) : 'Custom amount'} &middot;
+								{link.accepted_chains?.length || 0} chains &middot;
+								{formatDate(link.created_at)}
 							</p>
 						</div>
 						<div class="flex items-center gap-2">
-							<span class="px-2 py-1 rounded-full text-xs font-medium {link.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}">
+							<span class="px-2 py-0.5 rounded-md text-[11px] font-medium {link.is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-surface-500/10 text-surface-400 border border-surface-500/20'}">
 								{link.is_active ? 'Active' : 'Inactive'}
 							</span>
 							<button onclick={() => copyLink(link.id)}
-								class="px-3 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-								Copy Link
+								class="px-3 py-1.5 text-[12px] font-medium border border-white/[0.08] rounded-lg hover:bg-white/[0.04] transition-colors">
+								{copiedId === link.id ? 'Copied!' : 'Copy Link'}
 							</button>
 						</div>
 					</div>

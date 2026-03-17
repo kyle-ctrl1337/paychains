@@ -31,15 +31,19 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    # Add is_admin column if it doesn't exist (migration)
+    # Add new columns if they don't exist (migrations)
     from sqlalchemy import text
+    migrations = [
+        "ALTER TABLE merchants ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE merchants ADD COLUMN IF NOT EXISTS xpub_key TEXT",
+        "ALTER TABLE merchants ADD COLUMN IF NOT EXISTS plan VARCHAR(20) DEFAULT 'free'",
+    ]
     async with engine.begin() as conn:
-        try:
-            await conn.execute(text(
-                "ALTER TABLE merchants ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE"
-            ))
-        except Exception:
-            pass  # Column already exists or not supported
+        for sql in migrations:
+            try:
+                await conn.execute(text(sql))
+            except Exception:
+                pass  # Column already exists or not supported
 
     # Ensure admin account exists
     ADMIN_EMAILS = ["kakvjgufdj@gmail.com"]

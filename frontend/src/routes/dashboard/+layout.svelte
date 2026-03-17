@@ -125,14 +125,58 @@
 				<span class="text-[14px] font-semibold">PayChains</span>
 			</a>
 			<button onclick={() => sidebarOpen = !sidebarOpen} class="text-surface-400">
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				{#if sidebarOpen}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				{:else}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				{/if}
 			</button>
 		</div>
 	</div>
 
+	<!-- Mobile sidebar drawer -->
+	{#if sidebarOpen}
+		<div class="md:hidden fixed inset-0 z-40">
+			<div class="absolute inset-0 bg-black/60" onclick={() => sidebarOpen = false}></div>
+			<aside class="absolute top-14 left-0 bottom-0 w-[260px] bg-surface-950 border-r border-white/[0.06] flex flex-col overflow-y-auto">
+				<nav class="flex-1 px-3 py-4 space-y-0.5">
+					{#each navItems as item}
+						<a
+							href={item.href}
+							onclick={() => sidebarOpen = false}
+							class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors
+								{currentPath === item.href
+									? 'bg-white/[0.06] text-white'
+									: 'text-surface-400 hover:text-surface-200 hover:bg-white/[0.03]'}"
+						>
+							<span class="{currentPath === item.href ? 'text-brand-400' : 'text-surface-500'}">{@html item.icon}</span>
+							{item.label}
+						</a>
+					{/each}
+				</nav>
+
+				<div class="px-3 py-4 border-t border-white/[0.06]">
+					{#if merchant}
+						<div class="px-2.5 py-2 mb-2">
+							<div class="text-[13px] font-medium text-surface-200 truncate">{merchant.company_name || merchant.email}</div>
+							<div class="text-[11px] text-surface-500 capitalize">{merchant.plan} plan</div>
+						</div>
+					{/if}
+					<button
+						onclick={() => { sidebarOpen = false; handleLogout(); }}
+						class="flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-[13px] text-surface-500 hover:text-red-400 hover:bg-red-500/[0.06] transition-colors"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+						Log out
+					</button>
+				</div>
+			</aside>
+		</div>
+	{/if}
+
 	<!-- Main Content -->
 	<main class="flex-1 min-w-0 overflow-auto">
-		<div class="max-w-6xl mx-auto px-6 py-8 md:py-10">
+		<div class="max-w-6xl mx-auto px-6 pt-20 pb-8 md:pt-10 md:pb-10">
 			{@render children()}
 		</div>
 	</main>

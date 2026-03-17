@@ -1,7 +1,7 @@
 export function createPaymentSocket(paymentId: string, onUpdate: (data: any) => void) {
 	// WebSocket for real-time payment status updates
 	// Will connect to backend WS endpoint in Phase 3
-	const wsBase = import.meta.env.VITE_WS_URL || 'wss://backend-api-production-ab9c.up.railway.app';
+	const wsBase = import.meta.env.VITE_WS_URL || 'wss://api.paychains.dev';
 	const wsUrl = `${wsBase}/ws/payments/${paymentId}`;
 
 	let ws: WebSocket | null = null;

@@ -1,3 +1,7 @@
+<script>
+	import Logo from '$lib/components/Logo.svelte';
+</script>
+
 <svelte:head>
 	<title>Privacy Policy - PayChains</title>
 </svelte:head>
@@ -6,13 +10,8 @@
 	<!-- Header -->
 	<nav class="sticky top-0 z-50 border-b border-white/[0.06] bg-surface-950/90 backdrop-blur-xl">
 		<div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-			<a href="/" class="flex items-center gap-2.5">
-				<div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-[15px] font-semibold tracking-[-0.01em]">PayChains</span>
+			<a href="/" class="flex items-center">
+				<Logo size={28} textClass="text-[15px]" />
 			</a>
 			<a href="/" class="text-[13px] text-surface-400 hover:text-white transition-colors flex items-center gap-1.5">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -55,7 +54,7 @@
 				</ul>
 
 				<h3 class="text-[16px] font-medium text-surface-200 mt-6 mb-3">2.3 Information from Third Parties</h3>
-				<p class="text-surface-400">We may receive information from blockchain analytics providers, identity verification services, and other partners to help detect fraud, comply with regulations, and improve our Service.</p>
+				<p class="text-surface-400">We may receive information from blockchain networks and public data sources to help monitor transactions, detect fraud, and improve our Service. PayChains does not perform identity verification (KYC) on merchants or their customers.</p>
 			</section>
 
 			<section>
@@ -64,10 +63,10 @@
 				<ul class="list-disc pl-6 space-y-2 mt-3 text-surface-400">
 					<li>To provide, operate, and maintain the Service, including processing payments, generating deposit addresses, and delivering webhook notifications.</li>
 					<li>To manage your account, authenticate access, and issue API credentials.</li>
-					<li>To monitor blockchain networks for transaction confirmations and auto-convert to stablecoins as configured.</li>
+					<li>To monitor blockchain networks for transaction confirmations and payment status updates.</li>
 					<li>To process billing, calculate transaction fees, and generate invoices.</li>
 					<li>To detect, prevent, and address fraud, abuse, security incidents, and technical issues.</li>
-					<li>To comply with applicable legal obligations, including anti-money laundering (AML) and know-your-customer (KYC) requirements where applicable.</li>
+					<li>To comply with applicable legal obligations where required by law.</li>
 					<li>To communicate with you about service updates, security alerts, and support inquiries.</li>
 					<li>To analyze usage patterns and improve the performance, reliability, and features of the Service.</li>
 				</ul>
@@ -91,7 +90,7 @@
 					<li><span class="text-surface-300">Blockchain networks:</span> transaction data is broadcast to and recorded on public blockchain networks (Ethereum, Polygon, BSC, Arbitrum, Base, and others) as an inherent part of processing payments.</li>
 					<li><span class="text-surface-300">Cloud infrastructure providers:</span> for hosting, data storage, and content delivery.</li>
 					<li><span class="text-surface-300">Analytics providers:</span> to help us understand usage patterns and improve the Service.</li>
-					<li><span class="text-surface-300">Blockchain analytics providers:</span> for transaction monitoring, fraud detection, and compliance purposes.</li>
+					<li><span class="text-surface-300">Blockchain RPC providers:</span> for reading on-chain transaction data, confirming payments, and interacting with smart contracts.</li>
 					<li><span class="text-surface-300">Communication providers:</span> for sending transactional emails, webhook deliveries, and support communications.</li>
 				</ul>
 				<p class="mt-3 text-surface-400">We require all third-party providers to handle your data in accordance with applicable data protection laws and our contractual obligations.</p>

@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { api } from '$lib/api/client';
 	import QRCode from 'qrcode';
+	import Logo from '$lib/components/Logo.svelte';
 
 	let paymentId = $state('');
 	let payment = $state<any>(null);
@@ -155,13 +156,8 @@
 			<div class="rounded-2xl border border-white/[0.06] bg-surface-900/80 backdrop-blur-xl shadow-2xl overflow-hidden">
 				<!-- Header -->
 				<div class="px-8 pt-8 pb-6 text-center border-b border-white/[0.06]">
-					<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-medium mb-4">
-						<div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-								<polyline points="4 12 9 17 20 6" />
-							</svg>
-						</div>
-						PayChains
+					<div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-medium mb-4">
+						<Logo size={22} textClass="text-xs" />
 					</div>
 					<h2 class="text-lg font-semibold text-white">
 						Upgrade to {planNames[targetPlan] || 'Pro'}

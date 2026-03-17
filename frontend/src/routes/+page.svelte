@@ -1,4 +1,5 @@
 <script>
+	import Logo from '$lib/components/Logo.svelte';
 	import { auth } from '$lib/stores/auth';
 
 	let isLoggedIn = $state(false);
@@ -81,13 +82,8 @@
 	<!-- Navigation -->
 	<nav class="relative z-10 border-b border-white/[0.06]">
 		<div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-			<a href="/" class="flex items-center gap-2.5">
-				<div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-[15px] font-semibold tracking-[-0.01em]">PayChains</span>
+			<a href="/" class="flex items-center">
+				<Logo size={28} textClass="text-[15px]" />
 			</a>
 
 			<div class="hidden md:flex items-center gap-8 text-[13px] text-surface-400">
@@ -456,14 +452,7 @@ console.<span class="token-function">log</span>(payment.<span class="token-prope
 	<!-- Footer -->
 	<footer class="relative z-10 border-t border-white/[0.04] py-12 px-6">
 		<div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-			<div class="flex items-center gap-2.5">
-				<div class="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
-					<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-[13px] font-semibold">PayChains</span>
-			</div>
+			<Logo size={24} textClass="text-[13px]" />
 			<div class="flex items-center gap-6 text-[12px] text-surface-500">
 				<a href="#features" class="hover:text-surface-300 transition-colors">Features</a>
 				<a href="#pricing" class="hover:text-surface-300 transition-colors">Pricing</a>

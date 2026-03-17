@@ -1,3 +1,7 @@
+<script>
+	import Logo from '$lib/components/Logo.svelte';
+</script>
+
 <svelte:head>
 	<title>Terms of Service - PayChains</title>
 </svelte:head>
@@ -6,13 +10,8 @@
 	<!-- Header -->
 	<nav class="sticky top-0 z-50 border-b border-white/[0.06] bg-surface-950/90 backdrop-blur-xl">
 		<div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-			<a href="/" class="flex items-center gap-2.5">
-				<div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-[15px] font-semibold tracking-[-0.01em]">PayChains</span>
+			<a href="/" class="flex items-center">
+				<Logo size={28} textClass="text-[15px]" />
 			</a>
 			<a href="/" class="text-[13px] text-surface-400 hover:text-white transition-colors flex items-center gap-1.5">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -41,9 +40,9 @@
 				<p>PayChains provides a crypto payment processing platform that enables businesses to:</p>
 				<ul class="list-disc pl-6 space-y-2 mt-3 text-surface-400">
 					<li>Accept cryptocurrency payments across multiple blockchain networks, including Ethereum, Polygon, BSC, Arbitrum, and Base.</li>
-					<li>Generate unique HD-wallet-derived deposit addresses for each payment.</li>
+					<li>Generate deposit addresses derived from the merchant's own wallet — PayChains is fully non-custodial and never holds funds.</li>
 					<li>Create and manage recurring subscription billing in cryptocurrency.</li>
-					<li>Auto-convert received tokens to stablecoins (USDC, USDT) at the time of payment.</li>
+					<li>Accept payments in USDC, USDT, DAI, and native tokens (ETH, MATIC, BNB) directly to merchant wallets.</li>
 					<li>Receive real-time webhook notifications with HMAC-SHA256 signatures for payment events.</li>
 					<li>Provide hosted checkout pages and QR codes for customer-facing payment flows.</li>
 				</ul>
@@ -83,14 +82,14 @@
 
 			<section>
 				<h2 class="text-xl font-semibold text-white mb-4">5. Fees and Payments</h2>
-				<p>PayChains charges transaction fees based on your plan tier:</p>
+				<p>PayChains operates on a SaaS subscription model with <span class="text-white font-medium">zero transaction fees</span>. All payments go directly to your wallet — we never take a cut.</p>
 				<ul class="list-disc pl-6 space-y-2 mt-3 text-surface-400">
-					<li><span class="text-surface-300">Free tier:</span> 1.0% per transaction</li>
-					<li><span class="text-surface-300">Pro tier:</span> 0.5% per transaction</li>
-					<li><span class="text-surface-300">Enterprise tier:</span> custom volume-based pricing</li>
+					<li><span class="text-surface-300">Free tier:</span> $0/month — up to 100 payments/month, 0% transaction fees</li>
+					<li><span class="text-surface-300">Pro tier:</span> $49/month — up to 2,000 payments/month, 0% transaction fees</li>
+					<li><span class="text-surface-300">Enterprise tier:</span> $199/month — unlimited payments, 0% transaction fees, priority support</li>
 				</ul>
-				<p class="mt-3 text-surface-400">Fees are deducted automatically from each transaction before settlement. Network gas fees incurred during on-chain transactions are separate from PayChains fees and are borne by the appropriate party as determined by the transaction configuration.</p>
-				<p class="mt-3 text-surface-400">We reserve the right to change our fee structure with 30 days' prior notice. Continued use of the Service after a fee change constitutes acceptance of the new fees.</p>
+				<p class="mt-3 text-surface-400">Plan subscriptions are billed monthly via cryptocurrency. Network gas fees incurred by payers during on-chain transactions are separate and are not charged by PayChains.</p>
+				<p class="mt-3 text-surface-400">We reserve the right to change our pricing with 30 days' prior notice. Continued use of the Service after a pricing change constitutes acceptance of the new pricing.</p>
 			</section>
 
 			<section>

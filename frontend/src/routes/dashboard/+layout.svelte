@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import Logo from '$lib/components/Logo.svelte';
 
 	let { children } = $props();
 	let merchant = $state<any>(null);
@@ -98,13 +99,8 @@
 	<!-- Desktop Sidebar -->
 	<aside class="hidden md:flex w-[240px] flex-col border-r border-white/[0.06] bg-surface-950 shrink-0">
 		<div class="px-5 h-14 flex items-center border-b border-white/[0.06]">
-			<a href="/" class="flex items-center gap-2 group">
-				<div class="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
-					<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-[14px] font-semibold group-hover:text-brand-400 transition-colors">PayChains</span>
+			<a href="/" class="group">
+				<Logo size={24} textClass="text-[14px] group-hover:text-brand-400 transition-colors" />
 			</a>
 		</div>
 
@@ -143,13 +139,8 @@
 	<!-- Mobile header -->
 	<div class="md:hidden fixed top-0 left-0 right-0 z-50 bg-surface-950/80 backdrop-blur-xl border-b border-white/[0.06]">
 		<div class="flex items-center justify-between px-4 h-14">
-			<a href="/" class="flex items-center gap-2">
-				<div class="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
-					<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-[14px] font-semibold">PayChains</span>
+			<a href="/">
+				<Logo size={24} textClass="text-[14px]" />
 			</a>
 			<button onclick={() => sidebarOpen = !sidebarOpen} class="w-8 h-8 flex items-center justify-center text-surface-400 hover:text-white transition-colors">
 				{#if sidebarOpen}

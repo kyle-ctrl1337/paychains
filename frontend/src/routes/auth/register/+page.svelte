@@ -2,6 +2,7 @@
 	import { api } from '$lib/api/client';
 	import { setAuth } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
+	import Logo from '$lib/components/Logo.svelte';
 
 	let email = $state('');
 	let password = $state('');
@@ -53,13 +54,8 @@
 		<div class="grid-bg absolute inset-0"></div>
 		<div class="hero-glow bg-brand-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
 		<div class="relative z-10 max-w-md px-12">
-			<div class="flex items-center gap-2.5 mb-8">
-				<div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-lg font-semibold">PayChains</span>
+			<div class="mb-8">
+				<Logo size={32} textClass="text-lg" />
 			</div>
 			<h2 class="text-2xl font-bold tracking-tight mb-3">Start accepting crypto in minutes</h2>
 			<p class="text-surface-400 text-[14px] leading-relaxed mb-8">Get your API keys instantly. No approval process, no credit card required.</p>
@@ -99,13 +95,8 @@
 	<!-- Right panel -->
 	<div class="flex-1 flex items-center justify-center px-6 py-12">
 		<div class="w-full max-w-sm">
-			<a href="/" class="lg:hidden flex items-center gap-2 mb-10">
-				<div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="4 12 9 17 20 6" />
-					</svg>
-				</div>
-				<span class="text-[15px] font-semibold">PayChains</span>
+			<a href="/" class="lg:hidden mb-10 inline-block">
+				<Logo size={28} textClass="text-[15px]" />
 			</a>
 
 			{#if apiKeys}

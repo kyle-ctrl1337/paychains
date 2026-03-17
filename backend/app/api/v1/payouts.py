@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_merchant_api_key
+from app.dependencies import get_current_merchant
 from app.models.merchant import Merchant
 from app.models.payout import Payout
 from app.schemas.webhook import PayoutRequest, PayoutResponse
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/payouts", tags=["Payouts"])
 async def list_payouts(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     offset = (page - 1) * per_page
@@ -34,7 +34,7 @@ async def list_payouts(
 @router.post("/request", response_model=PayoutResponse, status_code=201)
 async def request_payout(
     data: PayoutRequest,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     # Validate chain has a settlement address

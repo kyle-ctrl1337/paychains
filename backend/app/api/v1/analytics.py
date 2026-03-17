@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_merchant_api_key
+from app.dependencies import get_current_merchant
 from app.models.merchant import Merchant
 from app.models.payment import Payment
 from app.models.subscription import Subscription
@@ -38,7 +38,7 @@ def _parse_date_range(
 async def analytics_overview(
     start: str | None = Query(None, description="ISO date string"),
     end: str | None = Query(None, description="ISO date string"),
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     period_start, period_end = _parse_date_range(start, end)
@@ -84,7 +84,7 @@ async def analytics_overview(
 async def analytics_by_chain(
     start: str | None = None,
     end: str | None = None,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     period_start, period_end = _parse_date_range(start, end)
@@ -114,7 +114,7 @@ async def analytics_by_chain(
 async def analytics_by_token(
     start: str | None = None,
     end: str | None = None,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     period_start, period_end = _parse_date_range(start, end)
@@ -144,7 +144,7 @@ async def analytics_by_token(
 async def analytics_revenue(
     start: str | None = None,
     end: str | None = None,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     period_start, period_end = _parse_date_range(start, end)

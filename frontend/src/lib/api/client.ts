@@ -56,49 +56,53 @@ export const api = {
 	rollApiKeys: (token: string) =>
 		request<any>('/merchant/api-keys/roll', { method: 'POST', token }),
 
-	// Payments
-	listPayments: (apiKey: string, params?: string) =>
-		request<any[]>(`/payments${params ? `?${params}` : ''}`, { apiKey }),
+	// Payments (accept token or apiKey)
+	listPayments: (auth: string, params?: string) =>
+		request<any[]>(`/payments${params ? `?${params}` : ''}`, auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	getPayment: (apiKey: string, id: string) =>
-		request<any>(`/payments/${id}`, { apiKey }),
+	getPayment: (auth: string, id: string) =>
+		request<any>(`/payments/${id}`, auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	createPayment: (apiKey: string, data: any) =>
-		request<any>('/payments/create', { method: 'POST', apiKey, body: data }),
+	createPayment: (auth: string, data: any) =>
+		request<any>('/payments/create', { method: 'POST', body: data, ...(auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }) }),
 
 	// Payment Links
-	listPaymentLinks: (apiKey: string) =>
-		request<any[]>('/payment-links', { apiKey }),
+	listPaymentLinks: (auth: string) =>
+		request<any[]>('/payment-links', auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	createPaymentLink: (apiKey: string, data: any) =>
-		request<any>('/payment-links', { method: 'POST', apiKey, body: data }),
+	createPaymentLink: (auth: string, data: any) =>
+		request<any>('/payment-links', { method: 'POST', body: data, ...(auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }) }),
 
 	// Subscriptions
-	listSubscriptions: (apiKey: string) =>
-		request<any[]>('/subscriptions', { apiKey }),
+	listSubscriptions: (auth: string) =>
+		request<any[]>('/subscriptions', auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	createSubscription: (apiKey: string, data: any) =>
-		request<any>('/subscriptions', { method: 'POST', apiKey, body: data }),
+	createSubscription: (auth: string, data: any) =>
+		request<any>('/subscriptions', { method: 'POST', body: data, ...(auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }) }),
 
 	// Analytics
-	getOverview: (apiKey: string, params?: string) =>
-		request<any>(`/analytics/overview${params ? `?${params}` : ''}`, { apiKey }),
+	getOverview: (auth: string, params?: string) =>
+		request<any>(`/analytics/overview${params ? `?${params}` : ''}`, auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	getByChain: (apiKey: string) => request<any[]>('/analytics/by-chain', { apiKey }),
+	getByChain: (auth: string) =>
+		request<any[]>('/analytics/by-chain', auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	getByToken: (apiKey: string) => request<any[]>('/analytics/by-token', { apiKey }),
+	getByToken: (auth: string) =>
+		request<any[]>('/analytics/by-token', auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
 	// Webhooks
-	listWebhookEvents: (apiKey: string) => request<any[]>('/webhooks/events', { apiKey }),
+	listWebhookEvents: (auth: string) =>
+		request<any[]>('/webhooks/events', auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	sendTestWebhook: (apiKey: string) =>
-		request<any>('/webhooks/test', { method: 'POST', apiKey, body: {} }),
+	sendTestWebhook: (auth: string) =>
+		request<any>('/webhooks/test', { method: 'POST', body: {}, ...(auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }) }),
 
 	// Payouts
-	listPayouts: (apiKey: string) => request<any[]>('/payouts', { apiKey }),
+	listPayouts: (auth: string) =>
+		request<any[]>('/payouts', auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }),
 
-	requestPayout: (apiKey: string, data: any) =>
-		request<any>('/payouts/request', { method: 'POST', apiKey, body: data }),
+	requestPayout: (auth: string, data: any) =>
+		request<any>('/payouts/request', { method: 'POST', body: data, ...(auth.startsWith('pc_') ? { apiKey: auth } : { token: auth }) }),
 
 	// Admin
 	adminStats: (token: string) => request<any>('/admin/stats', { token }),

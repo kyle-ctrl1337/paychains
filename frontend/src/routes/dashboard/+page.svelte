@@ -11,11 +11,12 @@
 
 	onMount(() => {
 		auth.subscribe(async (state) => {
-			if (!state.apiKeyTest) return;
+			if (!state.token) return;
 			try {
+				const auth_key = state.apiKeyTest || state.token;
 				const [ov, chains] = await Promise.all([
-					api.getOverview(state.apiKeyTest),
-					api.getByChain(state.apiKeyTest)
+					api.getOverview(auth_key),
+					api.getByChain(auth_key)
 				]);
 				overview = ov;
 				chainData = chains;

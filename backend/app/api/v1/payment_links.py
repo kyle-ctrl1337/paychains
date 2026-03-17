@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_merchant_api_key
+from app.dependencies import get_current_merchant
 from app.models.merchant import Merchant
 from app.models.payment_link import PaymentLink
 from app.schemas.payment import (
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/payment-links", tags=["Payment Links"])
 @router.post("", response_model=PaymentLinkResponse, status_code=201)
 async def create_payment_link(
     data: PaymentLinkCreate,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     link = PaymentLink(
@@ -45,7 +45,7 @@ async def create_payment_link(
 async def list_payment_links(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     offset = (page - 1) * per_page
@@ -62,7 +62,7 @@ async def list_payment_links(
 @router.get("/{link_id}", response_model=PaymentLinkResponse)
 async def get_payment_link(
     link_id: uuid.UUID,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -80,7 +80,7 @@ async def get_payment_link(
 async def update_payment_link(
     link_id: uuid.UUID,
     data: PaymentLinkUpdate,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -103,7 +103,7 @@ async def update_payment_link(
 @router.delete("/{link_id}", status_code=204)
 async def deactivate_payment_link(
     link_id: uuid.UUID,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(

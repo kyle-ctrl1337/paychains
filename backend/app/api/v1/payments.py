@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_merchant_api_key
+from app.dependencies import get_current_merchant
 from app.models.merchant import Merchant
 from app.models.payment import Payment
 from app.schemas.payment import PaymentCreate, PaymentResponse
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/payments", tags=["Payments"])
 @router.post("/create", response_model=PaymentResponse, status_code=201)
 async def create_payment(
     data: PaymentCreate,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -41,7 +41,7 @@ async def create_payment(
 @router.get("/{payment_id}", response_model=PaymentResponse)
 async def get_payment(
     payment_id: uuid.UUID,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -61,7 +61,7 @@ async def list_payments(
     per_page: int = Query(20, ge=1, le=100),
     status: str | None = None,
     chain: str | None = None,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Payment).where(Payment.merchant_id == merchant.id)
@@ -82,7 +82,7 @@ async def list_payments(
 @router.post("/{payment_id}/refund", response_model=PaymentResponse)
 async def refund_payment(
     payment_id: uuid.UUID,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(

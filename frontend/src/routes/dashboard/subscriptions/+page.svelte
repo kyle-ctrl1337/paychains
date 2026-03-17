@@ -9,9 +9,9 @@
 
 	onMount(() => {
 		auth.subscribe(async (state) => {
-			if (!state.apiKeyTest) return;
+			if (!state.token) return;
 			try {
-				subscriptions = await api.listSubscriptions(state.apiKeyTest);
+				subscriptions = await api.listSubscriptions(state.apiKeyTest || state.token);
 			} catch {
 				subscriptions = [];
 			} finally {

@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_merchant_api_key
+from app.dependencies import get_current_merchant
 from app.models.merchant import Merchant
 from app.models.subscription import Subscription
 from app.schemas.subscription import (
@@ -29,7 +29,7 @@ INTERVAL_DELTAS = {
 @router.post("", response_model=SubscriptionResponse, status_code=201)
 async def create_subscription(
     data: SubscriptionCreate,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     if data.interval not in INTERVAL_DELTAS:
@@ -67,7 +67,7 @@ async def list_subscriptions(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: str | None = None,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Subscription).where(Subscription.merchant_id == merchant.id)
@@ -85,7 +85,7 @@ async def list_subscriptions(
 @router.get("/{sub_id}", response_model=SubscriptionResponse)
 async def get_subscription(
     sub_id: uuid.UUID,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -103,7 +103,7 @@ async def get_subscription(
 async def update_subscription(
     sub_id: uuid.UUID,
     data: SubscriptionUpdate,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -141,7 +141,7 @@ async def update_subscription(
 @router.delete("/{sub_id}", status_code=204)
 async def cancel_subscription(
     sub_id: uuid.UUID,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(

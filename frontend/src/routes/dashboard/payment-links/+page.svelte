@@ -16,8 +16,8 @@
 
 	onMount(() => {
 		auth.subscribe(async (state) => {
-			if (!state.apiKeyTest) return;
-			apiKey = state.apiKeyTest;
+			if (!state.token) return;
+			apiKey = state.apiKeyTest || state.token;
 			await loadLinks();
 		});
 	});

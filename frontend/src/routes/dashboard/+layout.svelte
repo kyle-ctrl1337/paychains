@@ -77,17 +77,34 @@
 	}
 </script>
 
+<style>
+	.sidebar-overlay {
+		animation: fadeIn 200ms ease-out;
+	}
+	.sidebar-drawer {
+		animation: slideIn 250ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+	@keyframes slideIn {
+		from { transform: translateX(-100%); }
+		to { transform: translateX(0); }
+	}
+</style>
+
 <div class="min-h-screen flex bg-surface-950">
-	<!-- Sidebar -->
-	<aside class="hidden md:flex w-[240px] flex-col border-r border-white/[0.06] bg-surface-950">
+	<!-- Desktop Sidebar -->
+	<aside class="hidden md:flex w-[240px] flex-col border-r border-white/[0.06] bg-surface-950 shrink-0">
 		<div class="px-5 h-14 flex items-center border-b border-white/[0.06]">
-			<a href="/dashboard" class="flex items-center gap-2">
+			<a href="/" class="flex items-center gap-2 group">
 				<div class="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
 					<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 						<polyline points="4 12 9 17 20 6" />
 					</svg>
 				</div>
-				<span class="text-[14px] font-semibold">PayChains</span>
+				<span class="text-[14px] font-semibold group-hover:text-brand-400 transition-colors">PayChains</span>
 			</a>
 		</div>
 
@@ -126,7 +143,7 @@
 	<!-- Mobile header -->
 	<div class="md:hidden fixed top-0 left-0 right-0 z-50 bg-surface-950/80 backdrop-blur-xl border-b border-white/[0.06]">
 		<div class="flex items-center justify-between px-4 h-14">
-			<a href="/dashboard" class="flex items-center gap-2">
+			<a href="/" class="flex items-center gap-2">
 				<div class="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
 					<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 						<polyline points="4 12 9 17 20 6" />
@@ -134,7 +151,7 @@
 				</div>
 				<span class="text-[14px] font-semibold">PayChains</span>
 			</a>
-			<button onclick={() => sidebarOpen = !sidebarOpen} class="text-surface-400">
+			<button onclick={() => sidebarOpen = !sidebarOpen} class="w-8 h-8 flex items-center justify-center text-surface-400 hover:text-white transition-colors">
 				{#if sidebarOpen}
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				{:else}
@@ -147,14 +164,14 @@
 	<!-- Mobile sidebar drawer -->
 	{#if sidebarOpen}
 		<div class="md:hidden fixed inset-0 z-40">
-			<div class="absolute inset-0 bg-black/60" onclick={() => sidebarOpen = false}></div>
-			<aside class="absolute top-14 left-0 bottom-0 w-[260px] bg-surface-950 border-r border-white/[0.06] flex flex-col overflow-y-auto">
+			<div class="sidebar-overlay absolute inset-0 bg-black/60 backdrop-blur-sm" onclick={() => sidebarOpen = false}></div>
+			<aside class="sidebar-drawer absolute top-14 left-0 bottom-0 w-[280px] bg-surface-950 border-r border-white/[0.06] flex flex-col overflow-y-auto shadow-2xl shadow-black/40">
 				<nav class="flex-1 px-3 py-4 space-y-0.5">
 					{#each navItems as item}
 						<a
 							href={item.href}
 							onclick={() => sidebarOpen = false}
-							class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors
+							class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg text-[13px] font-medium transition-colors
 								{currentPath === item.href
 									? 'bg-white/[0.06] text-white'
 									: 'text-surface-400 hover:text-surface-200 hover:bg-white/[0.03]'}"
@@ -174,7 +191,7 @@
 					{/if}
 					<button
 						onclick={() => { sidebarOpen = false; handleLogout(); }}
-						class="flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-[13px] text-surface-500 hover:text-red-400 hover:bg-red-500/[0.06] transition-colors"
+						class="flex items-center gap-2 w-full px-2.5 py-2.5 rounded-lg text-[13px] text-surface-500 hover:text-red-400 hover:bg-red-500/[0.06] transition-colors"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
 						Log out

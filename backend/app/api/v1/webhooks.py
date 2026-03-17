@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_merchant_api_key
+from app.dependencies import get_current_merchant
 from app.models.merchant import Merchant
 from app.models.webhook_event import WebhookEvent
 from app.schemas.webhook import WebhookEventResponse, WebhookTestRequest
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/webhooks", tags=["Webhooks"])
 async def list_webhook_events(
     page: int = 1,
     per_page: int = 20,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     offset = (page - 1) * per_page
@@ -36,7 +36,7 @@ async def list_webhook_events(
 @router.post("/test", response_model=WebhookEventResponse, status_code=201)
 async def send_test_webhook(
     data: WebhookTestRequest,
-    merchant: Merchant = Depends(get_current_merchant_api_key),
+    merchant: Merchant = Depends(get_current_merchant),
     db: AsyncSession = Depends(get_db),
 ):
     if not merchant.webhook_url:

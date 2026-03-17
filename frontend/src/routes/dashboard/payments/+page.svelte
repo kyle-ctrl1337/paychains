@@ -109,7 +109,9 @@
 					</thead>
 					<tbody class="divide-y divide-white/[0.04]">
 						{#each payments as payment}
-							<tr class="hover:bg-white/[0.02] transition-colors">
+							{@const isOpenable = (payment.status === 'pending' || payment.status === 'confirming') && new Date(payment.expires_at) > new Date()}
+							<tr class="hover:bg-white/[0.02] transition-colors {isOpenable ? 'cursor-pointer' : ''}"
+								onclick={() => { if (isOpenable) window.location.href = `/dashboard/payments/${payment.id}`; }}>
 								<td class="px-5 py-3.5 text-[12px] font-mono text-surface-500">{payment.id.slice(0, 8)}...</td>
 								<td class="px-5 py-3.5 text-[13px] font-medium tabular-nums">{formatUSD(payment.amount_usd)}</td>
 								<td class="px-5 py-3.5 text-[13px] text-surface-300">{payment.token}</td>
@@ -118,6 +120,9 @@
 									<span class="px-2 py-0.5 rounded-md text-[11px] font-medium {statusColor(payment.status)}">
 										{payment.status}
 									</span>
+									{#if isOpenable}
+										<span class="ml-1.5 text-[10px] text-brand-400">Open</span>
+									{/if}
 								</td>
 								<td class="px-5 py-3.5 text-[12px] font-mono text-surface-500">{shortenAddress(payment.deposit_address)}</td>
 								<td class="px-5 py-3.5 text-[12px] text-surface-500">{formatDate(payment.created_at)}</td>
